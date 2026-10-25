@@ -17,7 +17,6 @@ deploy/aws/.terraform/
 deploy/aws/*.tfstate
 deploy/aws/*.tfstate.*
 deploy/aws/*.tfplan
-deploy/aws/terraform.tfvars
 deploy/aws/crash.log
 
 # Editor and OS files
