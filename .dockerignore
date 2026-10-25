@@ -1,0 +1,36 @@
+# Build inputs pulled in by the Dockerfile only, plus local build output.
+.git
+**/.git
+**/.gitignore
+
+# Frontend
+frontend/node_modules
+frontend/dist
+frontend/.expo
+frontend/.claude
+frontend/web-build
+frontend/android
+frontend/ios
+frontend/npm-debug.log*
+
+# Backend
+backend/target
+backend/src/main/resources/static
+backend/backend-run.log
+backend/*.log
+
+# Infrastructure state (can be large and contains secrets)
+deploy/aws/.terraform
+deploy/aws/*.tfstate
+deploy/aws/*.tfstate.*
+deploy/aws/terraform.tfvars
+
+# Local docs / tooling
+.claude
+.idea
+.vscode
+*.md
+*.log
+.env
+.env.*
+!.env.example

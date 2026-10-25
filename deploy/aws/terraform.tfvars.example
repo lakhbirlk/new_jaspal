@@ -1,0 +1,44 @@
+aws_region  = "us-east-1"
+name        = "business-directory"
+environment = "prod"
+
+# The first administrator created in the empty database. Change it before applying.
+admin_email    = "admin@example.com"
+admin_password = "replace-with-a-long-password"
+
+# Image tag to deploy. Use a git SHA once you push immutable tags.
+image_tag = "latest"
+
+# Size. Defaults to 2 vCPU / 4 GB; uncomment to override.
+# task_cpu    = 2048
+# task_memory = 4096
+
+# Lowest-cost defaults.
+use_fargate_spot = true
+desired_count    = 1
+
+# ARM64 costs about 20% less on Fargate, but the image must be built for
+# linux/arm64. See the build commands in README.md before switching.
+# cpu_architecture = "ARM64"
+
+# Database: single-AZ Graviton micro with 20 GiB gp3.
+# db_instance_class         = "db.t4g.micro"
+# db_allocated_storage      = 20
+# db_backup_retention_days  = 7
+
+# HTTPS (recommended for anything reachable from the internet).
+# The certificate must be in the same region and cover the domain you point
+# at the ALB DNS name.
+# acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/..."
+# frontend_url        = "https://directory.example.com"
+# cors_origins        = "https://directory.example.com"
+
+# Outbound email (optional).
+# mail_from     = "no-reply@example.com"
+# smtp_host     = "email-smtp.us-east-1.amazonaws.com"
+# smtp_port     = 587
+# smtp_user     = "..."
+# smtp_password = "..."
+
+# Payment webhook signing secret (optional).
+# payment_webhook_secret = "..."

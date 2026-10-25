@@ -1,0 +1,28 @@
+# Build output
+backend/target/
+backend/src/main/resources/static/
+frontend/node_modules/
+frontend/dist/
+frontend/.expo/
+frontend/web-build/
+*.log
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Terraform state and secrets
+deploy/aws/.terraform/
+deploy/aws/*.tfstate
+deploy/aws/*.tfstate.*
+deploy/aws/*.tfplan
+deploy/aws/terraform.tfvars
+deploy/aws/crash.log
+
+# Editor and OS files
+.idea/
+.vscode/
+.claude/
+.DS_Store
+Thumbs.db

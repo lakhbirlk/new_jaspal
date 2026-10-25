@@ -1,0 +1,8 @@
+app:
+  dev:
+    expose-email-tokens: true
+    seed-demo: true
+
+logging:
+  level:
+    com.example.directory: debug
