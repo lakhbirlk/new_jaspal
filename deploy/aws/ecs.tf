@@ -148,6 +148,7 @@ resource "aws_ecs_task_definition" "app" {
 
       environment = [
         { name = "PORT", value = "8080" },
+        { name = "SEED_DEMO", value = "true" },
         { name = "DB_URL", value = "jdbc:postgresql://${aws_db_instance.app.address}:${aws_db_instance.app.port}/${var.db_name}" },
         { name = "DB_USER", value = var.db_user },
         { name = "ADMIN_EMAIL", value = var.admin_email },
