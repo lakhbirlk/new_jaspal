@@ -1,0 +1,15 @@
+# Copy to terraform.tfvars and adjust.
+aws_region    = "us-east-1"
+name          = "business-directory"
+environment   = "demo"
+instance_type = "t4g.small"
+
+# Public repository cloned and built on first boot.
+git_repo_url = "https://github.com/lakhbirlk/new_jaspal.git"
+git_branch   = "main"
+
+# Leave empty to disable SSH; use `aws ssm start-session` instead.
+ssh_cidr = ""
+
+admin_email = "admin@example.com"
+seed_demo   = true
