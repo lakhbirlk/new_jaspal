@@ -2,10 +2,15 @@ locals {
   service_name = "${var.name}-${var.environment}"
   ssm_prefix   = "/${var.name}/${var.environment}"
 
-  scheme       = var.acm_certificate_arn == "" ? "http" : "https"
-  alb_url      = "${local.scheme}://${aws_lb.app.dns_name}"
-  frontend_url = var.frontend_url != "" ? var.frontend_url : local.alb_url
-  cors_origins = var.cors_origins != "" ? var.cors_origins : local.frontend_url
+  scheme         = var.acm_certificate_arn == "" ? "http" : "https"
+  alb_url        = "${local.scheme}://${aws_lb.app.dns_name}"
+  cloudfront_url = "https://${aws_cloudfront_distribution.app.domain_name}"
+
+  # Browsers reach the app through CloudFront, so email links use it and both
+  # origins may call the API: a page loaded from the ALB still sends the ALB
+  # origin, and CloudFront-tunnelled requests send the CloudFront origin.
+  frontend_url = var.frontend_url != "" ? var.frontend_url : local.cloudfront_url
+  cors_origins = var.cors_origins != "" ? var.cors_origins : "${local.cloudfront_url},${local.alb_url}"
 }
 
 data "aws_caller_identity" "current" {}

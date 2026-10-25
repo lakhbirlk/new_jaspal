@@ -3,6 +3,11 @@ output "alb_url" {
   value       = local.alb_url
 }
 
+output "https_url" {
+  description = "Public HTTPS URL served by CloudFront (valid certificate, no domain needed)."
+  value       = "https://${aws_cloudfront_distribution.app.domain_name}"
+}
+
 output "alb_dns_name" {
   description = "ALB DNS name to use in a Route 53 alias record."
   value       = aws_lb.app.dns_name
