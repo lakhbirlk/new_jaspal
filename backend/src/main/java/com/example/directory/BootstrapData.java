@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -27,6 +28,94 @@ import java.time.temporal.ChronoUnit;
 public class BootstrapData implements ApplicationRunner {
 
     private static final String DEMO_PASSWORD = "Demo@12345";
+
+    private record DemoBusiness(String legalName, String tradeName, String industry, String category,
+                                String city, String state, String addressLine, String postalCode,
+                                String description) {
+    }
+
+    private static final List<DemoBusiness> DEMO_BUSINESSES = List.of(
+            new DemoBusiness("Sahyadri Analytical Instruments Private Limited", "Sahyadri Instruments",
+                    "Scientific equipment", "Analytical instruments", "Pune", "Maharashtra",
+                    "41 MIDC Bhosari", "411026",
+                    "Laboratory-grade spectrometers, chromatographs and calibration services for research labs."),
+            new DemoBusiness("Meridian Pharma Labs Limited", "Meridian Labs",
+                    "Pharmaceuticals", "Contract research", "Hyderabad", "Telangana",
+                    "Plot 18 Genome Valley", "500078",
+                    "Contract testing and formulation development for small-molecule drugs."),
+            new DemoBusiness("Bluewave IT Solutions Private Limited", "Bluewave IT",
+                    "Information technology", "Software services", "Bengaluru", "Karnataka",
+                    "7th Floor, Prestige Tech Park, Kadubeesanahalli", "560103",
+                    "Custom software, data engineering and cloud migration services."),
+            new DemoBusiness("NorthStar Logistics India Private Limited", "NorthStar Logistics",
+                    "Logistics", "Freight forwarding", "Chennai", "Tamil Nadu",
+                    "22 Port Trust Road, Royapuram", "600013",
+                    "Pan-India container freight and cold-chain distribution."),
+            new DemoBusiness("Green Harvest AgriTech Private Limited", "Green Harvest",
+                    "Agriculture", "Agri inputs", "Nashik", "Maharashtra",
+                    "Gat No. 45, Dindori Road", "422004",
+                    "Drip irrigation systems, soil testing kits and farm advisory services."),
+            new DemoBusiness("Loomcraft Textiles Private Limited", "Loomcraft",
+                    "Textiles", "Home furnishings", "Surat", "Gujarat",
+                    "108 Ring Road, Udhna", "394210",
+                    "Woven home textiles exported to Europe and the Gulf."),
+            new DemoBusiness("TorqueLine Auto Components Limited", "TorqueLine",
+                    "Automotive", "Precision parts", "Coimbatore", "Tamil Nadu",
+                    "9 SIDCO Industrial Estate", "641021",
+                    "Machined engine and transmission components for OEMs."),
+            new DemoBusiness("Vindhya Chemicals Private Limited", "Vindhya Chemicals",
+                    "Chemicals", "Specialty chemicals", "Vadodara", "Gujarat",
+                    "Plot 212 GIDC Makarpura", "390010",
+                    "Specialty solvents and intermediates for coatings manufacturers."),
+            new DemoBusiness("CarePoint Medical Devices Private Limited", "CarePoint",
+                    "Healthcare", "Medical devices", "Delhi", "Delhi",
+                    "B-14 Okhla Industrial Area Phase II", "110020",
+                    "Patient monitors, infusion pumps and hospital-grade consumables."),
+            new DemoBusiness("SunGrid Renewables Limited", "SunGrid",
+                    "Renewable energy", "Solar EPC", "Jaipur", "Rajasthan",
+                    "SP-6 Sitapura Industrial Area", "302022",
+                    "Turnkey rooftop and utility-scale solar installations."),
+            new DemoBusiness("Annapurna Food Processing Private Limited", "Annapurna Foods",
+                    "Food processing", "Packaged foods", "Indore", "Madhya Pradesh",
+                    "31 Pologround Industrial Area", "452015",
+                    "Ready-to-cook staples and dehydrated vegetable processing."),
+            new DemoBusiness("SolidBuild Construction Materials Private Limited", "SolidBuild",
+                    "Construction", "Building materials", "Ahmedabad", "Gujarat",
+                    "Survey 210, Sarkhej-Bavla Highway", "382210",
+                    "Cement blocks, precast panels and waterproofing systems."),
+            new DemoBusiness("CircuitWorks Electronics Private Limited", "CircuitWorks",
+                    "Electronics", "PCB assembly", "Kochi", "Kerala",
+                    "17 KINFRA Park, Kalamassery", "683104",
+                    "PCB design, SMT assembly and electronics testing."),
+            new DemoBusiness("PackRight Solutions Private Limited", "PackRight",
+                    "Packaging", "Flexible packaging", "Nagpur", "Maharashtra",
+                    "5 Butibori MIDC", "441122",
+                    "Flexible laminates and sustainable packaging for FMCG brands."),
+            new DemoBusiness("InsightEdge Consulting Private Limited", "InsightEdge",
+                    "Consulting", "Market research", "Mumbai", "Maharashtra",
+                    "302 Nariman Point", "400021",
+                    "Market entry studies and supply-chain benchmarking."),
+            new DemoBusiness("Vidya Learning Systems Private Limited", "Vidya Learning",
+                    "Education", "EdTech", "Lucknow", "Uttar Pradesh",
+                    "44 Gomti Nagar Extension", "226010",
+                    "Blended learning platforms and vocational training content."),
+            new DemoBusiness("Oakwood Interiors Private Limited", "Oakwood Interiors",
+                    "Furniture", "Contract furniture", "Chandigarh", "Chandigarh",
+                    "12 Industrial Area Phase I", "160002",
+                    "Ergonomic office and institutional furniture manufacturing."),
+            new DemoBusiness("Ironclad Fabrication Works Private Limited", "Ironclad Fabrication",
+                    "Metal fabrication", "Heavy fabrication", "Ludhiana", "Punjab",
+                    "88 Focal Point", "141010",
+                    "Structural steel fabrication and precision welding."),
+            new DemoBusiness("PolyMold Plastics Private Limited", "PolyMold",
+                    "Plastics", "Injection moulding", "Bhopal", "Madhya Pradesh",
+                    "6 Govindpura Industrial Area", "462023",
+                    "Injection-moulded components and tooling for appliances."),
+            new DemoBusiness("Helix Biotech Research Private Limited", "Helix Biotech",
+                    "Biotechnology", "Life sciences", "Visakhapatnam", "Andhra Pradesh",
+                    "3 AP MedTech Zone", "530046",
+                    "Assay development and pre-clinical research support.")
+    );
 
     private final UserRepository userRepository;
     private final ResearcherProfileRepository profileRepository;
@@ -112,7 +201,54 @@ public class BootstrapData implements ApplicationRunner {
         if (auditor != null) {
             log.info("Seeded demo auditor {}", auditor.getEmail());
         }
+
+        int seeded = seedDemoBusinesses();
+        log.info("Seeded {} demo businesses for the public listing", seeded);
         log.info("Demo accounts use password {}", DEMO_PASSWORD);
+    }
+
+    /**
+     * Creates a listed, verified business plus an active owner account for each entry in
+     * {@link #DEMO_BUSINESSES}. Idempotent: entries whose owner already exists are skipped.
+     */
+    private int seedDemoBusinesses() {
+        int seeded = 0;
+        for (int index = 1; index <= DEMO_BUSINESSES.size(); index++) {
+            DemoBusiness demo = DEMO_BUSINESSES.get(index - 1);
+            User owner = seedUser("business" + index + "@directory.local",
+                    demo.tradeName() + " Owner", Role.BUSINESS);
+            if (owner == null) {
+                continue;
+            }
+            String phone = String.format("+91 90000 %05d", 10000 + index);
+            Business business = new Business();
+            business.setOwnerUserId(owner.getId());
+            business.setLegalName(demo.legalName());
+            business.setTradeName(demo.tradeName());
+            business.setRegistrationNumber(String.format("U74999MH%04dPTC%05d", 2014 + index % 10, index));
+            business.setTaxId(cryptoService.encrypt(String.format("27AAACA%04dA1Z5", 1000 + index)));
+            business.setIndustry(demo.industry());
+            business.setCategory(demo.category());
+            business.setAddressLine(demo.addressLine());
+            business.setCity(demo.city());
+            business.setState(demo.state());
+            business.setCountry("India");
+            business.setPostalCode(demo.postalCode());
+            business.setWebsite("https://business" + index + ".example.com");
+            business.setPublicEmail("contact" + index + "@example.com");
+            business.setPublicPhone(phone);
+            business.setContactPersonName(owner.getFullName());
+            business.setContactPersonPhone(phone);
+            business.setAnnualRevenue(BigDecimal.valueOf(4_500_000L + (long) index * 1_750_000L));
+            business.setEmployeeCount(8 + index * 6);
+            business.setDescription(demo.description());
+            business.setVerificationStatus(VerificationStatus.VERIFIED);
+            business.setAdminListingStatus(AdminListingStatus.LISTED);
+            business.setListedUntil(Instant.now().plus(365, ChronoUnit.DAYS));
+            businessRepository.save(business);
+            seeded++;
+        }
+        return seeded;
     }
 
     private User seedUser(String email, String fullName, Role role) {

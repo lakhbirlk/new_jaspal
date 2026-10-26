@@ -51,7 +51,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
         } else if ("POST".equals(request.getMethod()) && path.equals("/api/v1/auth/register")) {
             limitKey = "register:" + ClientInfo.ip();
             limit = properties.getRateLimit().getRegisterPerMinute();
-        } else if ("GET".equals(request.getMethod()) && path.equals("/api/v1/businesses")) {
+        } else if ("GET".equals(request.getMethod())
+                && (path.equals("/api/v1/businesses")
+                    || path.equals("/api/v1/public/businesses")
+                    || path.startsWith("/api/v1/public/businesses/"))) {
             AuthPrincipal principal = principal();
             limitKey = "search:" + (principal != null ? principal.id() : ClientInfo.ip());
             limit = properties.getRateLimit().getSearchPerMinute();

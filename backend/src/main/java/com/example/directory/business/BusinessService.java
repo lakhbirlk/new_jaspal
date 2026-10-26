@@ -104,6 +104,50 @@ public class BusinessService {
         return policyEngine.filterOutput(map, principal, "business", state);
     }
 
+    /**
+     * Anonymised catalogue of currently listed businesses for anonymous visitors. It exposes
+     * enough to browse and shortlist but never enough to identify, contact or trade with a
+     * company; identity, contacts, statements and detail remain behind researcher access.
+     */
+    public PageResult<Map<String, Object>> publicList(String q, String industry, String city,
+                                                      int page, int size) {
+        Page<Business> result = businessRepository.searchPublic(
+                normalizeFilter(q), normalizeFilter(industry), normalizeFilter(city),
+                PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50)));
+        return PageResult.of(result, result.getContent().stream().map(this::publicMap).toList());
+    }
+
+    public Map<String, Object> publicDetail(UUID businessId) {
+        Business business = businessRepository.findById(businessId)
+                .orElseThrow(() -> ApiException.notFound("BUSINESS_NOT_FOUND", "Business not found"));
+        if (!listingStatusService.visibleToResearchers(business)) {
+            throw ApiException.notFound("BUSINESS_NOT_FOUND", "Business not found");
+        }
+        return publicMap(business);
+    }
+
+    private Map<String, Object> publicMap(Business business) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("id", business.getId());
+        map.put("public_code", publicCode(business.getId()));
+        map.put("industry", business.getIndustry());
+        map.put("category", business.getCategory());
+        map.put("city", business.getCity());
+        map.put("state", business.getState());
+        map.put("country", business.getCountry());
+        map.put("employee_count", business.getEmployeeCount());
+        map.put("annual_revenue", business.getAnnualRevenue());
+        return map;
+    }
+
+    private String publicCode(UUID id) {
+        return "DOB-" + id.toString().substring(0, 6).toUpperCase(Locale.ROOT);
+    }
+
+    private String normalizeFilter(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
     public PageResult<Map<String, Object>> auditorList(String q, int page, int size,
                                                        AuthPrincipal principal) {
         Page<Business> result = businessRepository.findAll(searchSpecification(q),

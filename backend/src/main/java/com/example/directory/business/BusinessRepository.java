@@ -71,4 +71,43 @@ public interface BusinessRepository extends JpaRepository<Business, UUID>, JpaSp
                                 @Param("industry") String industry,
                                 @Param("city") String city,
                                 Pageable pageable);
+
+    /**
+     * Public catalogue query. It matches free text only against non-identifying columns
+     * (industry, category, city, state), so an anonymous visitor cannot probe for a company
+     * by its legal or trade name.
+     */
+    @Query(value = """
+            select b.* from businesses b
+            join users u on u.id = b.owner_user_id
+            where u.status = 'ACTIVE'
+              and b.admin_listing_status = 'LISTED'
+              and b.listed_until > now()
+              and (cast(:q as text) is null or
+                   lower(coalesce(b.industry,'') || ' ' || coalesce(b.category,'') || ' ' ||
+                         coalesce(b.city,'') || ' ' || coalesce(b.state,''))
+                   like '%' || lower(cast(:q as text)) || '%')
+              and (cast(:industry as text) is null or lower(b.industry) = lower(cast(:industry as text)))
+              and (cast(:city as text) is null or lower(b.city) = lower(cast(:city as text)))
+            order by b.listed_until desc, b.created_at desc
+            """,
+            countQuery = """
+            select count(*)
+            from businesses b
+            join users u on u.id = b.owner_user_id
+            where u.status = 'ACTIVE'
+              and b.admin_listing_status = 'LISTED'
+              and b.listed_until > now()
+              and (cast(:q as text) is null or
+                   lower(coalesce(b.industry,'') || ' ' || coalesce(b.category,'') || ' ' ||
+                         coalesce(b.city,'') || ' ' || coalesce(b.state,''))
+                   like '%' || lower(cast(:q as text)) || '%')
+              and (cast(:industry as text) is null or lower(b.industry) = lower(cast(:industry as text)))
+              and (cast(:city as text) is null or lower(b.city) = lower(cast(:city as text)))
+            """,
+            nativeQuery = true)
+    Page<Business> searchPublic(@Param("q") String q,
+                                @Param("industry") String industry,
+                                @Param("city") String city,
+                                Pageable pageable);
 }

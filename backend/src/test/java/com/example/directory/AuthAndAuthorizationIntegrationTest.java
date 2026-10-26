@@ -215,6 +215,47 @@ class AuthAndAuthorizationIntegrationTest {
         assertThat(login(email, "Reset@12345").get("accessToken").asText()).isNotBlank();
     }
 
+    @Test
+    void publicCatalogueIsAnonymousAndCannotBeProbedByName() throws Exception {
+        MvcResult listResult = mockMvc.perform(get("/api/v1/public/businesses").param("size", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].public_code").exists())
+                .andReturn();
+        JsonNode list = body(listResult);
+        assertThat(list.get("total").asLong()).isGreaterThan(0);
+
+        JsonNode first = list.get("items").get(0);
+        assertThat(first.get("public_code").asText()).startsWith("DOB-");
+        assertThat(first.has("legal_name")).isFalse();
+        assertThat(first.has("trade_name")).isFalse();
+        assertThat(first.has("registration_number")).isFalse();
+        assertThat(first.has("tax_id")).isFalse();
+        assertThat(first.has("public_email")).isFalse();
+        assertThat(first.has("public_phone")).isFalse();
+        assertThat(first.has("bank_details")).isFalse();
+        assertThat(first.has("description")).isFalse();
+
+        mockMvc.perform(get("/api/v1/public/businesses/" + first.get("id").asText()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.public_code").value(first.get("public_code").asText()))
+                .andExpect(jsonPath("$.legal_name").doesNotExist())
+                .andExpect(jsonPath("$.public_email").doesNotExist());
+
+        mockMvc.perform(get("/api/v1/public/businesses/" + UUID.randomUUID()))
+                .andExpect(status().isNotFound());
+
+        // Free text matches sector, category and location only — never the company name.
+        MvcResult sectorSearch = mockMvc.perform(get("/api/v1/public/businesses").param("q", "pharma"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(body(sectorSearch).get("total").asLong()).isGreaterThan(0);
+
+        MvcResult nameSearch = mockMvc.perform(get("/api/v1/public/businesses").param("q", "NorthStar"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(body(nameSearch).get("total").asLong()).isZero();
+    }
+
     private String registerResearcher(String email, String fullName) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)

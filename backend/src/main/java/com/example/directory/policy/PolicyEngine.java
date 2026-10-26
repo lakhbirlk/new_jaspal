@@ -23,6 +23,12 @@ public class PolicyEngine {
 
     public Access effectiveAccess(Role role, UUID userId, String resource, String field,
                                   UnlockState state) {
+        if (role == Role.RESEARCHER && "business".equals(resource) && state == UnlockState.LOCKED) {
+            return switch (field) {
+                case "id", "public_code", "industry", "category", "city", "state", "country", "employee_count", "annual_revenue" -> Access.READ;
+                default -> Access.HIDDEN;
+            };
+        }
         Access override = userId == null ? null
                 : policyMap.overrideAccess(userId, resource, field, state);
         if (override != null) {
