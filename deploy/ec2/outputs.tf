@@ -4,7 +4,17 @@ output "public_ip" {
 }
 
 output "app_url" {
-  description = "Application URL. Not live until the first-boot build finishes (15-25 min)."
+  description = "Public HTTPS URL served by Caddy. Not live until the first-boot build and certificate issuance finish."
+  value       = local.https_url
+}
+
+output "https_hostname" {
+  description = "Hostname the certificate is issued for."
+  value       = local.https_host
+}
+
+output "direct_url" {
+  description = "Direct HTTP access on the app port, bypassing Caddy."
   value       = "http://${aws_eip.app.public_ip}:${var.app_port}"
 }
 

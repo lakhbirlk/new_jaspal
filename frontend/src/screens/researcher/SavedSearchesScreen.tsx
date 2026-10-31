@@ -50,6 +50,7 @@ export default function SavedSearchesScreen() {
         q: typeof query.q === 'string' ? query.q : undefined,
         industry: typeof query.industry === 'string' ? query.industry : undefined,
         city: typeof query.city === 'string' ? query.city : undefined,
+        state: typeof query.state === 'string' ? query.state : undefined,
       },
     });
   };

@@ -39,15 +39,17 @@ public interface BusinessRepository extends JpaRepository<Business, UUID>, JpaSp
             where u.status = 'ACTIVE'
               and b.admin_listing_status = 'LISTED'
               and b.listed_until > now()
-              and (cast(:q as text) is null or
-                   to_tsvector('english',
-                       coalesce(b.legal_name,'') || ' ' || coalesce(b.trade_name,'') || ' ' ||
-                       coalesce(b.industry,'') || ' ' || coalesce(b.category,'') || ' ' ||
-                       coalesce(b.city,'') || ' ' || coalesce(b.country,'') || ' ' ||
-                       coalesce(b.description,''))
-                   @@ plainto_tsquery('english', cast(:q as text)))
-              and (cast(:industry as text) is null or lower(b.industry) = lower(cast(:industry as text)))
-              and (cast(:city as text) is null or lower(b.city) = lower(cast(:city as text)))
+              and (:q is null or
+                   lower(concat_ws(' ',
+                       coalesce(b.legal_name,''), coalesce(b.trade_name,''), coalesce(b.industry,''),
+                       coalesce(b.category,''), coalesce(b.city,''), coalesce(b.country,''),
+                       coalesce(b.description,'')))
+                   like concat('%', lower(:q), '%'))
+              and (:industry is null or lower(b.industry) = lower(:industry))
+              and (:city is null or lower(b.city) = lower(:city))
+              and (:state is null or lower(b.state) = lower(:state))
+              and (:minRevenue is null or b.annual_revenue >= :minRevenue)
+              and (:maxRevenue is null or b.annual_revenue < :maxRevenue)
             """,
             countQuery = """
             select count(*)
@@ -56,21 +58,48 @@ public interface BusinessRepository extends JpaRepository<Business, UUID>, JpaSp
             where u.status = 'ACTIVE'
               and b.admin_listing_status = 'LISTED'
               and b.listed_until > now()
-              and (cast(:q as text) is null or
-                   to_tsvector('english',
-                       coalesce(b.legal_name,'') || ' ' || coalesce(b.trade_name,'') || ' ' ||
-                       coalesce(b.industry,'') || ' ' || coalesce(b.category,'') || ' ' ||
-                       coalesce(b.city,'') || ' ' || coalesce(b.country,'') || ' ' ||
-                       coalesce(b.description,''))
-                   @@ plainto_tsquery('english', cast(:q as text)))
-              and (cast(:industry as text) is null or lower(b.industry) = lower(cast(:industry as text)))
-              and (cast(:city as text) is null or lower(b.city) = lower(cast(:city as text)))
+              and (:q is null or
+                   lower(concat_ws(' ',
+                       coalesce(b.legal_name,''), coalesce(b.trade_name,''), coalesce(b.industry,''),
+                       coalesce(b.category,''), coalesce(b.city,''), coalesce(b.country,''),
+                       coalesce(b.description,'')))
+                   like concat('%', lower(:q), '%'))
+              and (:industry is null or lower(b.industry) = lower(:industry))
+              and (:city is null or lower(b.city) = lower(:city))
+              and (:state is null or lower(b.state) = lower(:state))
+              and (:minRevenue is null or b.annual_revenue >= :minRevenue)
+              and (:maxRevenue is null or b.annual_revenue < :maxRevenue)
             """,
             nativeQuery = true)
     Page<Business> searchListed(@Param("q") String q,
                                 @Param("industry") String industry,
                                 @Param("city") String city,
+                                @Param("state") String state,
+                                @Param("minRevenue") java.math.BigDecimal minRevenue,
+                                @Param("maxRevenue") java.math.BigDecimal maxRevenue,
                                 Pageable pageable);
+
+    @Query(value = """
+            select distinct b.industry from businesses b
+            join users u on u.id = b.owner_user_id
+            where u.status = 'ACTIVE'
+              and b.admin_listing_status = 'LISTED'
+              and b.listed_until > now()
+              and b.industry is not null and b.industry <> ''
+            order by 1
+            """, nativeQuery = true)
+    List<String> findListedIndustries();
+
+    @Query(value = """
+            select distinct b.state from businesses b
+            join users u on u.id = b.owner_user_id
+            where u.status = 'ACTIVE'
+              and b.admin_listing_status = 'LISTED'
+              and b.listed_until > now()
+              and b.state is not null and b.state <> ''
+            order by 1
+            """, nativeQuery = true)
+    List<String> findListedStates();
 
     /**
      * Public catalogue query. It matches free text only against non-identifying columns
@@ -83,12 +112,13 @@ public interface BusinessRepository extends JpaRepository<Business, UUID>, JpaSp
             where u.status = 'ACTIVE'
               and b.admin_listing_status = 'LISTED'
               and b.listed_until > now()
-              and (cast(:q as text) is null or
-                   lower(coalesce(b.industry,'') || ' ' || coalesce(b.category,'') || ' ' ||
-                         coalesce(b.city,'') || ' ' || coalesce(b.state,''))
-                   like '%' || lower(cast(:q as text)) || '%')
-              and (cast(:industry as text) is null or lower(b.industry) = lower(cast(:industry as text)))
-              and (cast(:city as text) is null or lower(b.city) = lower(cast(:city as text)))
+              and (:q is null or
+                   lower(concat_ws(' ',
+                       coalesce(b.industry,''), coalesce(b.category,''),
+                       coalesce(b.city,''), coalesce(b.state,'')))
+                   like concat('%', lower(:q), '%'))
+              and (:industry is null or lower(b.industry) = lower(:industry))
+              and (:city is null or lower(b.city) = lower(:city))
             order by b.listed_until desc, b.created_at desc
             """,
             countQuery = """
@@ -98,12 +128,13 @@ public interface BusinessRepository extends JpaRepository<Business, UUID>, JpaSp
             where u.status = 'ACTIVE'
               and b.admin_listing_status = 'LISTED'
               and b.listed_until > now()
-              and (cast(:q as text) is null or
-                   lower(coalesce(b.industry,'') || ' ' || coalesce(b.category,'') || ' ' ||
-                         coalesce(b.city,'') || ' ' || coalesce(b.state,''))
-                   like '%' || lower(cast(:q as text)) || '%')
-              and (cast(:industry as text) is null or lower(b.industry) = lower(cast(:industry as text)))
-              and (cast(:city as text) is null or lower(b.city) = lower(cast(:city as text)))
+              and (:q is null or
+                   lower(concat_ws(' ',
+                       coalesce(b.industry,''), coalesce(b.category,''),
+                       coalesce(b.city,''), coalesce(b.state,'')))
+                   like concat('%', lower(:q), '%'))
+              and (:industry is null or lower(b.industry) = lower(:industry))
+              and (:city is null or lower(b.city) = lower(:city))
             """,
             nativeQuery = true)
     Page<Business> searchPublic(@Param("q") String q,

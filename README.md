@@ -1,7 +1,7 @@
 # Multi-Role Business Directory Platform
 
 A business directory with four roles (guest, researcher, business owner, administrator), plus a
-read-only auditor portal. The API is Java 21 / Spring Boot 3 with PostgreSQL; the client is React
+read-only auditor portal. The API is Java 21 / Spring Boot 3 with MySQL 8; the client is React
 Native / TypeScript (Expo) targeting Android, iOS and the web.
 
 ## Single-image deployment
@@ -24,22 +24,22 @@ relative base, so browser requests stay on the same origin and need no CORS conf
 docker build -t business-directory:latest .
 ```
 
-### Run with PostgreSQL
+### Run with MySQL
 
 ```bash
 cp .env.example .env      # change JWT_SECRET, APP_CRYPTO_KEY and ADMIN_PASSWORD
 docker compose up --build -d
 ```
 
-Then open <http://localhost:8080>. The database is a named volume (`pgdata`) and migrations run
+Then open <http://localhost:8080>. The database is a named volume (`mysqldata`) and migrations run
 automatically on startup. Sign in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`; administrators do not
 use MFA. Auditors still enrol TOTP.
 
-### Run the image against an existing PostgreSQL
+### Run the image against an existing MySQL
 
 ```bash
 docker run -d --name business-directory -p 8080:8080 \
-  -e DB_URL=jdbc:postgresql://host.docker.internal:5432/directory \
+  -e DB_URL='jdbc:mysql://host.docker.internal:3306/directory?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false' \
   -e DB_USER=directory -e DB_PASSWORD=directory \
   -e JWT_SECRET='...at least 32 bytes...' \
   -e APP_CRYPTO_KEY='...base64 32-byte key...' \
@@ -56,7 +56,7 @@ All settings are environment variables; the full list lives in `.env.example` an
 | Variable | Purpose |
 | --- | --- |
 | `PORT` | HTTP port inside the container (default `8080`) |
-| `DB_URL`, `DB_USER`, `DB_PASSWORD` | PostgreSQL connection |
+| `DB_URL`, `DB_USER`, `DB_PASSWORD` | MySQL connection |
 | `JWT_SECRET` | HMAC key for access tokens (≥ 32 bytes) |
 | `APP_CRYPTO_KEY` | Base64 32-byte AES key for encrypted fields |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` | Bootstrap administrator |
@@ -74,7 +74,7 @@ The container exposes `GET /` as its health check. The `business-directory` user
 ## Deploying to AWS ECS
 
 A Terraform stack in [`deploy/aws`](deploy/aws/README.md) runs the image on ECS Fargate Spot with
-RDS PostgreSQL, an Application Load Balancer and SSM-backed secrets. Its default 2 vCPU / 4 GB
+RDS MySQL, an Application Load Balancer and SSM-backed secrets. Its default 2 vCPU / 4 GB
 task, public subnets without a NAT gateway, single-AZ `db.t4g.micro` and 7-day log retention keep
 the bill at roughly $55–65/month in `us-east-1`; dropping the task to 2 GB brings it to about
 $40–46/month. See the [deployment README](deploy/aws/README.md) for build/push, HTTPS and teardown
@@ -82,10 +82,18 @@ steps.
 
 ## Local development
 
+The backend needs a local MySQL 8 server. Create the schema and account once, then start it:
+
+```sql
+CREATE DATABASE directory CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+CREATE USER 'directory'@'localhost' IDENTIFIED BY 'directory';
+GRANT ALL PRIVILEGES ON directory.* TO 'directory'@'localhost';
+```
+
 ```bash
-# API with an embedded PostgreSQL (dev profile also seeds demo accounts)
+# API against MySQL (the dev profile also seeds demo accounts)
 cd backend
-mvn spring-boot:run -Dspring-boot.run.profiles=embedded,dev
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
 # Web client with hot reload on http://localhost:8081
 cd frontend

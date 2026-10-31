@@ -29,7 +29,7 @@ output "ecs_service_name" {
 }
 
 output "db_endpoint" {
-  description = "PostgreSQL endpoint (reachable only from the application tasks)."
+  description = "MySQL endpoint (reachable only from the application tasks)."
   value       = aws_db_instance.app.endpoint
 }
 

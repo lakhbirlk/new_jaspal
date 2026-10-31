@@ -38,7 +38,6 @@ export default function BusinessEditScreen({ topInset = true }: { topInset?: boo
     void load();
   }, [load]);
 
-  const editable = me?.user.status !== 'pending_review' && me?.user.status !== 'suspended';
   const missingFields = (completion?.missing ?? [])
     .filter((item) => item.kind === 'field')
     .map((item) => item.name);
@@ -84,7 +83,11 @@ export default function BusinessEditScreen({ topInset = true }: { topInset?: boo
 
   return (
     <Screen topInset={topInset}>
-      <Title subtitle="Complete every required field and upload the required documents before submitting for review.">
+      <Title
+        subtitle={me?.user.status === 'pending_review'
+          ? 'Your business is under review. You can keep updating its details; documents stay locked until the review is complete.'
+          : 'Complete every required field and upload the required documents before submitting for review.'}
+      >
         Business profile
       </Title>
 
@@ -114,32 +117,30 @@ export default function BusinessEditScreen({ topInset = true }: { topInset?: boo
             </View>
             {me?.user.status === 'pending_review' ? (
               <Text style={[typography.small, { marginTop: spacing.sm }]}>
-                Your business is under review and is read-only until an administrator approves it.
+                Your business is under review. You can keep updating these details until an
+                administrator approves it.
               </Text>
             ) : null}
           </Card>
 
           <ProfileCompletionCard completion={completion} />
-          <MissingFields missing={missingFields} />
+          <MissingFields
+            missing={missingFields}
+            title={me?.user.status === 'pending_review' ? 'Still missing' : undefined}
+          />
 
           <Card>
             <BusinessForm
               values={values}
               onChange={change}
               missing={missingFields}
-              accessFor={(field) => (editable ? 'write' : 'read')}
             />
             <Button
               title="Save business details"
               onPress={save}
               loading={saving}
-              disabled={!editable || saving}
+              disabled={saving}
             />
-            {!editable ? (
-              <Text style={[typography.small, { marginTop: spacing.sm }]}>
-                Editing is disabled while the profile is under review.
-              </Text>
-            ) : null}
           </Card>
         </>
       ) : null}

@@ -36,7 +36,7 @@ public class RefreshToken {
     @Column(length = 64)
     private String ip;
 
-    @Column(name = "user_agent")
+    @Column(name = "user_agent", columnDefinition = "text")
     private String userAgent;
 
     @Column(name = "created_at", nullable = false)

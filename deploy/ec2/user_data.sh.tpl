@@ -1,6 +1,7 @@
 #!/bin/bash
 # First-boot script: install Docker, build the image natively for arm64, and
-# run PostgreSQL plus the application container. Progress: /var/log/user-data.log
+# run MySQL, the application, and Caddy for HTTPS.
+# Progress: /var/log/user-data.log
 set -euxo pipefail
 
 exec > >(tee /var/log/user-data.log | logger -t user-data -s 2>/dev/console) 2>&1
@@ -32,20 +33,24 @@ cd /opt/app/repo
 docker build -t business-directory:local .
 
 # ---------------------------------------------------------------------------
-# PostgreSQL. The named volume keeps data across container recreation; the
-# data lives on the instance's root disk, so terminating the instance loses it.
+# MySQL. The named volume keeps data across container recreation; the data
+# lives on the instance's root disk, so terminating the instance loses it.
 # ---------------------------------------------------------------------------
 docker network create appnet 2>/dev/null || true
 docker rm -f app-db 2>/dev/null || true
 
 docker run -d --name app-db --network appnet --restart unless-stopped \
-  -e POSTGRES_DB=${db_name} \
-  -e POSTGRES_USER=${db_user} \
-  -e POSTGRES_PASSWORD=${db_password} \
-  -v app-pgdata:/var/lib/postgresql/data \
-  ${postgres_image}
+  -e MYSQL_DATABASE=${db_name} \
+  -e MYSQL_USER=${db_user} \
+  -e MYSQL_PASSWORD=${db_password} \
+  -e MYSQL_ROOT_PASSWORD=${db_password} \
+  -v app-mysqldata:/var/lib/mysql \
+  ${mysql_image} \
+  --character-set-server=utf8mb4 \
+  --collation-server=utf8mb4_0900_ai_ci \
+  --default-time-zone=+00:00
 
-until docker exec app-db pg_isready -U ${db_user} >/dev/null 2>&1; do
+until docker exec app-db mysqladmin ping -h 127.0.0.1 -u ${db_user} -p${db_password} --silent >/dev/null 2>&1; do
   sleep 3
 done
 
@@ -57,7 +62,7 @@ docker rm -f app 2>/dev/null || true
 docker run -d --name app --network appnet --restart unless-stopped \
   -p ${app_port}:${app_port} \
   -e PORT=${app_port} \
-  -e DB_URL=jdbc:postgresql://app-db:5432/${db_name} \
+  -e DB_URL="jdbc:mysql://app-db:3306/${db_name}?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false" \
   -e DB_USER=${db_user} \
   -e DB_PASSWORD=${db_password} \
   -e JWT_SECRET=${jwt_secret} \
@@ -67,6 +72,34 @@ docker run -d --name app --network appnet --restart unless-stopped \
   -e ADMIN_PASSWORD=${admin_pass} \
   -e SEED_DEMO=${seed_demo} \
   -e FRONTEND_URL=${app_url} \
-  -e CORS_ORIGINS=${app_url} \
+  -e CORS_ORIGINS="${app_url},${direct_url}" \
   -e JAVA_OPTS="-XX:MaxRAMPercentage=55" \
   business-directory:local
+
+# ---------------------------------------------------------------------------
+# Caddy: public HTTPS termination with a Let's Encrypt certificate.
+# Caddy obtains the certificate on first request using the HTTP-01 challenge,
+# which needs port 80 reachable from the internet and the hostname resolving
+# to this Elastic IP.
+# ---------------------------------------------------------------------------
+cat > /opt/app/Caddyfile <<'CADDY'
+{
+  email ${tls_email}
+}
+
+${https_host} {
+  encode gzip
+  reverse_proxy app:8080
+}
+CADDY
+
+docker rm -f caddy 2>/dev/null || true
+
+docker run -d --name caddy --network appnet --restart unless-stopped \
+  -p 80:80 \
+  -p 443:443 \
+  -p 443:443/udp \
+  -v /opt/app/Caddyfile:/etc/caddy/Caddyfile:ro \
+  -v caddy_data:/data \
+  -v caddy_config:/config \
+  caddy:2-alpine

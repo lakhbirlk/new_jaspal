@@ -5,6 +5,7 @@ import type {
   AdminUser,
   AuditLogEntry,
   AuthResponse,
+  BusinessFacets,
   BusinessRecord,
   Completion,
   DocumentSummary,
@@ -16,10 +17,16 @@ import type {
   MySubscription,
   PageResult,
   Payment,
+  PaymentAnalytics,
+  PaymentDashboardMetrics,
+  PaymentTransaction,
+  PaymentTransactionDetail,
   Plan,
+  PlanCheckout,
   PolicyOverride,
   PolicyRow,
   ProfileRequirement,
+  PublicBusiness,
   ResearcherProfile,
   SavedSearch,
   SettingsMap,
@@ -154,10 +161,17 @@ export function searchBusinesses(params: {
   q?: string;
   industry?: string;
   city?: string;
+  state?: string;
+  minRevenue?: number;
+  maxRevenue?: number;
   page?: number;
   size?: number;
 }) {
   return apiRequest<PageResult<BusinessRecord>>(`/businesses${buildQuery(params)}`);
+}
+
+export function fetchBusinessFacets() {
+  return apiRequest<BusinessFacets>('/businesses/facets');
 }
 
 // ---------------------------------------------------------------- documents
@@ -197,6 +211,22 @@ export function fetchPublicPlans(audience: 'researcher' | 'business') {
   return apiRequest<Plan[]>(`/public/plans${buildQuery({ audience })}`);
 }
 
+// ---------------------------------------------------------------- public catalogue
+
+export function fetchPublicBusinesses(params: {
+  q?: string;
+  industry?: string;
+  city?: string;
+  page?: number;
+  size?: number;
+}) {
+  return apiRequest<PageResult<PublicBusiness>>(`/public/businesses${buildQuery(params)}`);
+}
+
+export function fetchPublicBusiness(id: string) {
+  return apiRequest<PublicBusiness>(`/public/businesses/${encodeURIComponent(id)}`);
+}
+
 export function fetchResearcherPlans() {
   return apiRequest<Plan[]>('/plans');
 }
@@ -205,8 +235,17 @@ export function fetchListingPlans() {
   return apiRequest<Plan[]>('/listing-plans');
 }
 
-export function subscribe(planCode: string) {
-  return apiRequest<MySubscription>('/subscriptions', { body: { planCode } });
+/** Creates a pending subscription and payment; nothing is activated until it is paid. */
+export function startSubscriptionCheckout(planCode: string) {
+  return apiRequest<PlanCheckout>('/subscriptions', { body: { planCode } });
+}
+
+/** Sandbox gateway: settles one of the caller's pending subscription payments. */
+export function paySubscription(paymentId: string) {
+  return apiRequest<Payment>(`/payments/${encodeURIComponent(paymentId)}/pay`, {
+    method: 'POST',
+    body: {},
+  });
 }
 
 export function fetchMySubscription() {
@@ -500,6 +539,51 @@ export function refundPayment(id: string, reason?: string) {
   return apiRequest<Payment>(`/admin/payments/${encodeURIComponent(id)}/refund`, {
     body: { reason },
   });
+}
+
+export function fetchPaymentDashboardMetrics() {
+  return apiRequest<PaymentDashboardMetrics>('/admin/payments/dashboard');
+}
+
+export function fetchPaymentAnalytics(params: {
+  period?: 'daily' | 'weekly' | 'monthly' | 'custom';
+  from?: string;
+  to?: string;
+  currency?: string;
+}) {
+  return apiRequest<PaymentAnalytics>(`/admin/payments/analytics${buildQuery(params)}`);
+}
+
+export function fetchPaymentTransactions(params: {
+  page?: number;
+  size?: number;
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  gateway?: string;
+  search?: string;
+  sort?: 'createdAt' | 'paidAt' | 'amount' | 'status';
+  direction?: 'asc' | 'desc';
+}) {
+  return apiRequest<PageResult<PaymentTransaction>>(
+    `/admin/payments/transactions${buildQuery(params)}`,
+  );
+}
+
+export function fetchPaymentTransactionDetails(id: string) {
+  return apiRequest<PaymentTransactionDetail>(
+    `/admin/payments/transactions/${encodeURIComponent(id)}`,
+  );
+}
+
+export function exportPaymentTransactions(params: {
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  gateway?: string;
+  search?: string;
+}) {
+  return apiBlob(`/admin/payments/transactions/export${buildQuery(params)}`);
 }
 
 // ---------------------------------------------------------------- admin: policies

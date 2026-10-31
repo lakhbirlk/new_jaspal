@@ -24,6 +24,7 @@ public class ResearchAccessLog {
     @Column(name = "business_id")
     private UUID businessId;
 
+    @Column(columnDefinition = "text")
     private String query;
 
     @Column(name = "viewed_at", nullable = false)

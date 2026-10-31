@@ -2,8 +2,10 @@ import type { NavigatorScreenParams } from '@react-navigation/native';
 
 export type PublicStackParamList = {
   Landing: undefined;
+  CompanyDatabase: undefined;
+  PublicBusinessDetail: { id: string; publicCode?: string };
   Login: undefined;
-  Register: undefined;
+  Register: { role?: 'researcher' | 'business' } | undefined;
   VerifyEmail: { token?: string; email?: string } | undefined;
   ForgotPassword: { email?: string } | undefined;
   ResetPassword: { token?: string } | undefined;
@@ -24,7 +26,7 @@ export type OnboardingStackParamList = {
 };
 
 export type ResearcherTabParamList = {
-  Search: { q?: string; industry?: string; city?: string } | undefined;
+  Search: { q?: string; industry?: string; city?: string; state?: string } | undefined;
   Unlocked: undefined;
   Subscription: undefined;
   Profile: undefined;
@@ -34,6 +36,17 @@ export type ResearcherStackParamList = {
   ResearcherTabs: NavigatorScreenParams<ResearcherTabParamList> | undefined;
   BusinessDetail: { id: string; title?: string };
   Plans: undefined;
+  Checkout: {
+    paymentId: string;
+    planName: string;
+    planCode: string;
+    amount: number;
+    currency: string;
+    credits: number;
+    durationMonths: number;
+    upgrade?: boolean;
+    currentPlanName?: string;
+  };
   Ledger: undefined;
   SavedSearches: undefined;
   Account: undefined;
@@ -65,6 +78,7 @@ export type AdminTabParamList = {
   Dashboard: undefined;
   Users: undefined;
   Businesses: undefined;
+  Payments: undefined;
   More: undefined;
 };
 

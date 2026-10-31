@@ -6,14 +6,16 @@ import com.example.directory.common.PageResult;
 import com.example.directory.listing.ListingSubscription;
 import com.example.directory.listing.ListingSubscriptionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/admin/payments")
@@ -22,6 +24,7 @@ public class PaymentAdminController {
 
     private final PaymentService paymentService;
     private final PaymentRepository paymentRepository;
+    private final PaymentDashboardService dashboardService;
     private final ListingSubscriptionRepository listingRepository;
 
     @GetMapping
@@ -108,5 +111,90 @@ public class PaymentAdminController {
         if (value == null) return null;
         String text = value.toString().trim();
         return text.isEmpty() ? null : text;
+    }
+
+    @GetMapping("/dashboard")
+    @PreAuthorize("hasAuthority('payment:read')")
+    public PaymentDashboardService.DashboardMetrics getDashboardMetrics() {
+        return dashboardService.getMetrics();
+    }
+
+    @GetMapping("/analytics")
+    @PreAuthorize("hasAuthority('payment:read')")
+    public PaymentDashboardService.RevenueAnalytics getRevenueAnalytics(
+            @RequestParam(required = false) String period,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) String currency) {
+        return dashboardService.getAnalytics(period, from, to, currency);
+    }
+
+    @GetMapping("/transactions")
+    @PreAuthorize("hasAuthority('payment:read')")
+    public PageResult<Map<String, Object>> getTransactions(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "20") Integer size,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String dateFrom,
+            @RequestParam(required = false) String dateTo,
+            @RequestParam(required = false) String gateway,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String direction) {
+        return dashboardService.getTransactions(page, size, status, dateFrom, dateTo, gateway, search,
+                sort, direction);
+    }
+
+    @GetMapping("/transactions/{id}")
+    @PreAuthorize("hasAuthority('payment:read')")
+    public Map<String, Object> getTransactionDetails(@PathVariable UUID id) {
+        return dashboardService.getTransactionDetails(id);
+    }
+
+    @GetMapping("/transactions/export")
+    @PreAuthorize("hasAuthority('payment:read')")
+    public ResponseEntity<byte[]> exportTransactions(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String dateFrom,
+            @RequestParam(required = false) String dateTo,
+            @RequestParam(required = false) String gateway,
+            @RequestParam(required = false) String search,
+            @AuthenticationPrincipal AuthPrincipal admin) {
+        List<Map<String, Object>> rows = dashboardService.exportTransactions(
+                status, dateFrom, dateTo, gateway, search);
+        dashboardService.auditExport(admin.id(), status, dateFrom, dateTo, gateway, search, rows.size());
+
+        StringBuilder csv = new StringBuilder();
+        csv.append("Transaction ID,Order ID,Customer,Customer Email,Amount,Currency,Gateway,")
+                .append("Gateway Reference,Status,Created At,Paid At,Refunded At,Failure Reason\n");
+        for (Map<String, Object> row : rows) {
+            csv.append(csvValue(row.get("id"))).append(',')
+                    .append(csvValue(row.get("orderId"))).append(',')
+                    .append(csvValue(row.get("customerName"))).append(',')
+                    .append(csvValue(row.get("customerEmail"))).append(',')
+                    .append(csvValue(row.get("amount"))).append(',')
+                    .append(csvValue(row.get("currency"))).append(',')
+                    .append(csvValue(row.get("gateway"))).append(',')
+                    .append(csvValue(row.get("providerRef"))).append(',')
+                    .append(csvValue(row.get("status"))).append(',')
+                    .append(csvValue(row.get("createdAt"))).append(',')
+                    .append(csvValue(row.get("paidAt"))).append(',')
+                    .append(csvValue(row.get("refundedAt"))).append(',')
+                    .append(csvValue(row.get("failureReason"))).append('\n');
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("text/csv; charset=UTF-8"));
+        headers.setContentDispositionFormData("attachment", "payment-transactions.csv");
+        return ResponseEntity.ok().headers(headers).body(csv.toString().getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String csvValue(Object value) {
+        if (value == null) return "";
+        String str = value.toString();
+        if (str.contains(",") || str.contains("\"") || str.contains("\n")) {
+            return "\"" + str.replace("\"", "\"\"") + "\"";
+        }
+        return str;
     }
 }

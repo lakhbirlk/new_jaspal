@@ -6,6 +6,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  StyleProp,
   Text,
   TextInput,
   TextInputProps,
@@ -27,6 +28,8 @@ interface ScreenProps {
   contentContainerStyle?: ViewStyle;
   refreshing?: boolean;
   onRefresh?: () => void;
+  /** Widen the content column for board-style screens; defaults to the app width. */
+  contentWidth?: number;
 }
 
 export function Screen({
@@ -35,10 +38,19 @@ export function Screen({
   topInset = true,
   style,
   contentContainerStyle,
+  contentWidth,
 }: ScreenProps) {
   const insets = useSafeAreaInsets();
   const inner = (
-    <View style={[styles.screenInner, contentContainerStyle]}>{children}</View>
+    <View
+      style={[
+        styles.screenInner,
+        contentWidth ? { maxWidth: contentWidth } : null,
+        contentContainerStyle,
+      ]}
+    >
+      {children}
+    </View>
   );
 
   if (!scroll) {
@@ -47,7 +59,14 @@ export function Screen({
         style={[styles.screen, style]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={[styles.screenInnerWrap, { paddingTop: topInset ? insets.top : 0 }, contentContainerStyle]}>
+        <View
+          style={[
+            styles.screenInnerWrap,
+            contentWidth ? { maxWidth: contentWidth } : null,
+            { paddingTop: topInset ? insets.top : 0 },
+            contentContainerStyle,
+          ]}
+        >
           {inner}
         </View>
       </KeyboardAvoidingView>
@@ -107,7 +126,7 @@ export function Card({
   onPress,
 }: {
   children: React.ReactNode;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   onPress?: () => void;
 }) {
   if (onPress) {
@@ -176,7 +195,7 @@ export function Button({
 const buttonStyles: Record<ButtonVariant, { container: ViewStyle; text: { color: string } }> = {
   primary: { container: { backgroundColor: colors.primary }, text: { color: colors.white } },
   secondary: {
-    container: { backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: '#bfd3ff' },
+    container: { backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: '#C9CFE0' },
     text: { color: colors.primaryDark },
   },
   ghost: { container: { backgroundColor: 'transparent' }, text: { color: colors.primary } },

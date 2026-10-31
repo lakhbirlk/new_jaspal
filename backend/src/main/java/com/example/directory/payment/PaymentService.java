@@ -79,6 +79,11 @@ public class PaymentService {
 
     @Transactional
     public Map<String, Object> markFailed(UUID paymentId, String providerRef) {
+        return markFailed(paymentId, providerRef, null);
+    }
+
+    @Transactional
+    public Map<String, Object> markFailed(UUID paymentId, String providerRef, String reason) {
         Payment payment = repository.findById(paymentId)
                 .orElseThrow(() -> ApiException.notFound("PAYMENT_NOT_FOUND", "Payment not found"));
         if (payment.getStatus() == PaymentStatus.PAID) {
@@ -90,6 +95,9 @@ public class PaymentService {
         payment.setStatus(PaymentStatus.FAILED);
         if (providerRef != null && !providerRef.isBlank()) {
             payment.setProviderRef(providerRef);
+        }
+        if (reason != null && !reason.isBlank()) {
+            payment.setFailureReason(reason.trim());
         }
         Payment saved = repository.save(payment);
         auditService.record(null, "PAYMENT_FAILED", "payment", saved.getId(), null, toMap(saved));
@@ -105,9 +113,12 @@ public class PaymentService {
         }
         Map<String, Object> before = toMap(payment);
         payment.setStatus(PaymentStatus.REFUNDED);
+        payment.setRefundedAt(Instant.now());
+        if (reason != null && !reason.isBlank()) {
+            payment.setRefundReason(reason.trim());
+        }
         Payment saved = repository.save(payment);
         Map<String, Object> after = toMap(saved);
-        after.put("reason", reason);
         auditService.record(actor, "PAYMENT_REFUNDED", "payment", paymentId, before, after);
         return after;
     }
@@ -154,6 +165,9 @@ public class PaymentService {
         map.put("recordedBy", payment.getRecordedBy());
         map.put("createdAt", payment.getCreatedAt());
         map.put("paidAt", payment.getPaidAt());
+        map.put("refundedAt", payment.getRefundedAt());
+        map.put("refundReason", payment.getRefundReason());
+        map.put("failureReason", payment.getFailureReason());
         return map;
     }
 }

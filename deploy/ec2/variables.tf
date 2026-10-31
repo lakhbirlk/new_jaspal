@@ -53,7 +53,7 @@ variable "ssh_cidr" {
 }
 
 variable "db_user" {
-  description = "PostgreSQL user and database name."
+  description = "MySQL user and database name."
   type        = string
   default     = "directory"
 }
@@ -76,8 +76,20 @@ variable "seed_demo" {
   default     = true
 }
 
-variable "postgres_image" {
-  description = "PostgreSQL container image. Must match the backend's expected major version."
+variable "https_domain" {
+  description = "Hostname Caddy obtains a certificate for. Leave empty to use the Elastic IP's free <ip-with-dashes>.sslip.io name."
   type        = string
-  default     = "postgres:16-alpine"
+  default     = ""
+}
+
+variable "tls_email" {
+  description = "Contact email registered with Let's Encrypt (optional but recommended)."
+  type        = string
+  default     = "admin@example.com"
+}
+
+variable "mysql_image" {
+  description = "MySQL container image. Must match the backend's expected major version."
+  type        = string
+  default     = "mysql:8.4"
 }

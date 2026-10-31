@@ -33,17 +33,17 @@ public class AuditLog {
     private UUID resourceId;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "before_state", columnDefinition = "jsonb")
+    @Column(name = "before_state", columnDefinition = "json")
     private String beforeState;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "after_state", columnDefinition = "jsonb")
+    @Column(name = "after_state", columnDefinition = "json")
     private String afterState;
 
     @Column(length = 64)
     private String ip;
 
-    @Column(name = "user_agent")
+    @Column(name = "user_agent", columnDefinition = "text")
     private String userAgent;
 
     @Column(name = "created_at", nullable = false)

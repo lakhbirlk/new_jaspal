@@ -67,6 +67,8 @@ public class AppProperties {
     @Data
     public static class Payments {
         private String webhookSecret;
+        /** Enables the built-in sandbox gateway so users can complete a checkout locally. */
+        private boolean demoGatewayEnabled = true;
     }
 
     @Data

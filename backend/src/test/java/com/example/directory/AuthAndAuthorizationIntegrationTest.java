@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "app.rate-limit.register-per-minute=1000",
         "app.rate-limit.search-per-minute=1000"
 })
-@ActiveProfiles("embedded")
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 class AuthAndAuthorizationIntegrationTest {
 
@@ -125,13 +125,17 @@ class AuthAndAuthorizationIntegrationTest {
                         .param("q", "Acme")
                         .header("Authorization", bearer(token)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items[0].legal_name").exists())
+                .andExpect(jsonPath("$.items[0].public_code").exists())
                 .andReturn();
 
         JsonNode item = body(result).get("items").get(0);
         String businessId = item.get("id").asText();
         assertThat(item.get("unlocked").asBoolean()).isFalse();
-        assertThat(item.get("registration_number").asText()).startsWith("****");
+        assertThat(item.has("industry")).isTrue();
+        assertThat(item.has("city")).isTrue();
+        assertThat(item.has("legal_name")).isFalse();
+        assertThat(item.has("trade_name")).isFalse();
+        assertThat(item.has("registration_number")).isFalse();
         assertThat(item.has("public_email")).isFalse();
         assertThat(item.has("tax_id")).isFalse();
         assertThat(item.has("bank_details")).isFalse();
@@ -183,6 +187,40 @@ class AuthAndAuthorizationIntegrationTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("FIELD_NOT_WRITABLE"))
                 .andExpect(jsonPath("$.details.field").value("admin_listing_status"));
+    }
+
+    @Test
+    void businessOwnerCanEditWhileUnderReview() throws Exception {
+        String email = uniqueEmail("review-edit");
+        registerBusiness(email, "Review Edit Company");
+        User owner = userRepository.findByEmailIgnoreCase(email).orElseThrow();
+        owner.setStatus(UserStatus.PENDING_REVIEW);
+        userRepository.save(owner);
+
+        String token = login(email, PASSWORD).get("accessToken").asText();
+
+        mockMvc.perform(patch("/api/v1/my/business")
+                        .header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "city", "Pune",
+                                "description", "Updated while under review"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.city").value("Pune"))
+                .andExpect(jsonPath("$.description").value("Updated while under review"));
+
+        // The edit screen loads the record first, so read must also be allowed while restricted.
+        mockMvc.perform(get("/api/v1/my/business")
+                        .header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.city").value("Pune"));
+
+        mockMvc.perform(patch("/api/v1/my/business")
+                        .header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of("admin_listing_status", "listed"))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FIELD_NOT_WRITABLE"));
     }
 
     @Test

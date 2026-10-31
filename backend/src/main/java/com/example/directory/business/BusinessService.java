@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -30,6 +31,8 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class BusinessService {
+
+    private static final int MAX_LIABILITIES = 50;
 
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
@@ -53,10 +56,6 @@ public class BusinessService {
     @Transactional
     public Map<String, Object> updateMyBusiness(AuthPrincipal principal, Map<String, Object> payload) {
         User user = requireUser(principal.id());
-        if (user.getStatus() == UserStatus.PENDING_REVIEW) {
-            throw ApiException.conflict("PROFILE_UNDER_REVIEW",
-                    "Your business cannot be edited while it is under review");
-        }
         if (user.getStatus() == UserStatus.SUSPENDED) {
             throw ApiException.forbidden("ACCOUNT_SUSPENDED", "This account is suspended");
         }
@@ -65,7 +64,9 @@ public class BusinessService {
         }
         Business business = requireOwned(principal.id());
         Map<String, Object> before = map(business, true);
-        policyEngine.filterInput(payload, principal, "business");
+        // The owner may always edit their own editable fields, including while the profile is
+        // under review. Field visibility policies govern what other roles see, not what an owner
+        // may maintain; applyFields still rejects status and system fields for non-admins.
         applyFields(business, payload, false);
         businessRepository.save(business);
         Map<String, Object> after = map(business, true);
@@ -101,7 +102,9 @@ public class BusinessService {
 
         UnlockState state = policyEngine.unlockState(principal, "business", businessId);
         Map<String, Object> map = map(business, principal.role() != Role.RESEARCHER);
-        return policyEngine.filterOutput(map, principal, "business", state);
+        Map<String, Object> output = policyEngine.filterOutput(map, principal, "business", state);
+        output.put("public_code", publicCode(businessId));
+        return output;
     }
 
     /**
@@ -140,7 +143,7 @@ public class BusinessService {
         return map;
     }
 
-    private String publicCode(UUID id) {
+    public String publicCode(UUID id) {
         return "DOB-" + id.toString().substring(0, 6).toUpperCase(Locale.ROOT);
     }
 
@@ -238,8 +241,16 @@ public class BusinessService {
         map.put("contact_person_phone", business.getContactPersonPhone());
         map.put("annual_revenue", business.getAnnualRevenue());
         map.put("employee_count", business.getEmployeeCount());
+        map.put("net_profit", business.getNetProfit());
+        map.put("net_worth", business.getNetWorth());
+        map.put("monthly_turnover", business.getMonthlyTurnover());
         map.put("bank_details", cryptoService.decrypt(business.getBankDetails()));
         map.put("description", business.getDescription());
+        map.put("profile_video_url", business.getProfileVideoUrl());
+        map.put("liabilities", business.getLiabilities());
+        map.put("ca_name", business.getCaName());
+        map.put("ca_membership_no", business.getCaMembershipNo());
+        map.put("ca_udin", business.getCaUdin());
         map.put("verification_status", business.getVerificationStatus().name().toLowerCase(Locale.ROOT));
         map.put("listed_until", business.getListedUntil());
         map.put("admin_listing_status", business.getAdminListingStatus().name().toLowerCase(Locale.ROOT));
@@ -296,8 +307,16 @@ public class BusinessService {
                 case "contact_person_phone" -> business.setContactPersonPhone(validatePhone(text(value)));
                 case "annual_revenue" -> business.setAnnualRevenue(decimal(value));
                 case "employee_count" -> business.setEmployeeCount(integer(value));
+                case "net_profit" -> business.setNetProfit(decimal(value));
+                case "net_worth" -> business.setNetWorth(decimal(value));
+                case "monthly_turnover" -> business.setMonthlyTurnover(turnoverSeries(value));
                 case "bank_details" -> business.setBankDetails(encrypt(text(value)));
                 case "description" -> business.setDescription(text(value));
+                case "profile_video_url" -> business.setProfileVideoUrl(validateVideoUrl(text(value)));
+                case "liabilities" -> business.setLiabilities(liabilities(value));
+                case "ca_name" -> business.setCaName(text(value));
+                case "ca_membership_no" -> business.setCaMembershipNo(text(value));
+                case "ca_udin" -> business.setCaUdin(text(value));
                 case "verification_status" -> {
                     if (!admin) throw ApiException.fieldForbidden(field);
                     business.setVerificationStatus(parseVerification(String.valueOf(value)));
@@ -416,6 +435,101 @@ public class BusinessService {
         }
     }
 
+    /**
+     * Accepts the 36-month series either as a JSON array or as a comma-separated string and
+     * stores it oldest-first in whole rupees.
+     */
+    private List<Long> turnoverSeries(Object value) {
+        if (value == null) return null;
+        List<?> raw = value instanceof Collection<?> collection
+                ? new ArrayList<>(collection)
+                : Arrays.stream(value.toString().split(",")).map(String::trim)
+                        .filter(item -> !item.isEmpty()).toList();
+        if (raw.size() > 36) {
+            throw ApiException.badRequest("INVALID_TURNOVER", "monthly_turnover accepts at most 36 months");
+        }
+        List<Long> series = new ArrayList<>(raw.size());
+        for (Object item : raw) {
+            try {
+                long amount = new BigDecimal(item.toString().trim()).setScale(0, RoundingMode.HALF_UP)
+                        .longValueExact();
+                if (amount < 0) throw new NumberFormatException();
+                series.add(amount);
+            } catch (Exception ex) {
+                throw ApiException.badRequest("INVALID_TURNOVER",
+                        "monthly_turnover values must be non-negative monthly amounts");
+            }
+        }
+        return series;
+    }
+
+    /**
+     * Accepts liabilities either as a JSON array of {type, lender, amount} objects or as
+     * "Type | Lender | Amount" lines, one liability per line. The lender may be omitted.
+     */
+    private List<Liability> liabilities(Object value) {
+        if (value == null) return null;
+        if (value instanceof Collection<?> collection) {
+            if (collection.size() > MAX_LIABILITIES) {
+                throw ApiException.badRequest("INVALID_LIABILITY",
+                        "liabilities accepts at most " + MAX_LIABILITIES + " entries");
+            }
+            List<Liability> parsed = new ArrayList<>(collection.size());
+            for (Object item : collection) {
+                if (!(item instanceof Map<?, ?> row)) {
+                    throw ApiException.badRequest("INVALID_LIABILITY",
+                            "Each liability must be an object with type, lender and amount");
+                }
+                parsed.add(liability(
+                        stringOrNull(row.get("type")),
+                        stringOrNull(row.get("lender")),
+                        row.get("amount")));
+            }
+            return parsed;
+        }
+
+        List<Liability> parsed = new ArrayList<>();
+        for (String line : value.toString().split("\\R")) {
+            if (line.isBlank()) continue;
+            if (parsed.size() >= MAX_LIABILITIES) {
+                throw ApiException.badRequest("INVALID_LIABILITY",
+                        "liabilities accepts at most " + MAX_LIABILITIES + " entries");
+            }
+            String[] parts = line.split("\\|");
+            if (parts.length < 2) {
+                throw ApiException.badRequest("INVALID_LIABILITY",
+                        "Each liability line must be 'Type | Lender | Amount'");
+            }
+            String type = parts[0].trim();
+            boolean hasLender = parts.length >= 3;
+            parsed.add(liability(type, hasLender ? parts[1].trim() : null,
+                    parts[parts.length - 1].trim()));
+        }
+        return parsed;
+    }
+
+    private Liability liability(String type, String lender, Object amountValue) {
+        if (type == null || type.isBlank()) {
+            throw ApiException.badRequest("INVALID_LIABILITY", "Liability type cannot be empty");
+        }
+        if (lender != null && lender.length() > 150) {
+            throw ApiException.badRequest("INVALID_LIABILITY", "Lender name is too long");
+        }
+        BigDecimal amount;
+        try {
+            amount = new BigDecimal(amountValue == null ? "" : amountValue.toString().trim());
+            if (amount.signum() < 0) throw new NumberFormatException();
+        } catch (Exception ex) {
+            throw ApiException.badRequest("INVALID_LIABILITY",
+                    "Liability outstanding amount must be a non-negative number");
+        }
+        return new Liability(type.trim(), lender, amount);
+    }
+
+    private String stringOrNull(Object value) {
+        return value == null || value.toString().isBlank() ? null : value.toString().trim();
+    }
+
     private String validateEmail(String value) {
         if (value == null) return null;
         if (!value.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
@@ -436,6 +550,15 @@ public class BusinessService {
         if (value == null) return null;
         if (!value.matches("^https?://.+")) {
             throw ApiException.badRequest("INVALID_URL", "website must start with http:// or https://");
+        }
+        return value;
+    }
+
+    private String validateVideoUrl(String value) {
+        if (value == null) return null;
+        if (!value.matches("^https?://.+")) {
+            throw ApiException.badRequest("INVALID_URL",
+                    "profile_video_url must start with http:// or https://");
         }
         return value;
     }

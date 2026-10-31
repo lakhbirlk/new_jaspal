@@ -1,6 +1,7 @@
 package com.example.directory.subscription;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -16,6 +17,13 @@ public interface BusinessUnlockRepository extends JpaRepository<BusinessUnlock, 
     Optional<BusinessUnlock> findBySubscriptionIdAndBusinessId(UUID subscriptionId, UUID businessId);
 
     List<BusinessUnlock> findByUserIdOrderByUnlockedAtDesc(UUID userId);
+
+    /** Moves unlocks to the replacement subscription when a researcher upgrades their plan. */
+    @Modifying(flushAutomatically = true)
+    @Query("update BusinessUnlock bu set bu.subscriptionId = :newSubscriptionId "
+            + "where bu.subscriptionId = :previousSubscriptionId")
+    int reassignSubscription(@Param("previousSubscriptionId") UUID previousSubscriptionId,
+                             @Param("newSubscriptionId") UUID newSubscriptionId);
 
     @Query("""
             select case when count(bu) > 0 then true else false end

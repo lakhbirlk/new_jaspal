@@ -37,6 +37,7 @@ public class CreditLedgerEntry {
     @Column(name = "balance_after", nullable = false)
     private int balanceAfter;
 
+    @Column(columnDefinition = "text")
     private String reason;
 
     @Column(name = "created_by")

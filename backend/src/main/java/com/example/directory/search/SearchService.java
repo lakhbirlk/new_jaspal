@@ -27,12 +27,16 @@ public class SearchService {
 
     @Transactional
     public PageResult<Map<String, Object>> search(AuthPrincipal principal, String q,
-                                                  String industry, String city,
+                                                  String industry, String city, String state,
+                                                  java.math.BigDecimal minRevenue,
+                                                  java.math.BigDecimal maxRevenue,
                                                   int page, int size) {
         String query = normalize(q);
         String industryFilter = normalize(industry);
         String cityFilter = normalize(city);
+        String stateFilter = normalize(state);
         Page<Business> result = businessRepository.searchListed(query, industryFilter, cityFilter,
+                stateFilter, minRevenue, maxRevenue,
                 PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50)));
 
         List<UUID> ids = result.getContent().stream().map(Business::getId).toList();
@@ -41,11 +45,13 @@ public class SearchService {
 
         List<Map<String, Object>> items = new ArrayList<>();
         for (Business business : result.getContent()) {
-            UnlockState state = principal.role() == Role.RESEARCHER
+            UnlockState unlockState = principal.role() == Role.RESEARCHER
                     ? (unlocked.contains(business.getId()) ? UnlockState.UNLOCKED : UnlockState.LOCKED)
                     : UnlockState.ANY;
-            items.add(policyEngine.filterOutput(businessService.map(business, false),
-                    principal, "business", state));
+            Map<String, Object> filtered = policyEngine.filterOutput(
+                    businessService.map(business, false), principal, "business", unlockState);
+            filtered.put("public_code", businessService.publicCode(business.getId()));
+            items.add(filtered);
         }
 
         if (principal.role() == Role.RESEARCHER) {
@@ -55,6 +61,14 @@ public class SearchService {
             accessLogRepository.save(log);
         }
         return PageResult.of(result, items);
+    }
+
+    /** Filter options for the company database: the industries and states present in listings. */
+    public Map<String, Object> facets() {
+        Map<String, Object> facets = new LinkedHashMap<>();
+        facets.put("industries", businessRepository.findListedIndustries());
+        facets.put("states", businessRepository.findListedStates());
+        return facets;
     }
 
     private String normalize(String value) {

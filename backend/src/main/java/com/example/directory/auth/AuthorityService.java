@@ -30,13 +30,16 @@ public class AuthorityService {
             return authorities;
         }
 
-        // Restricted session: profile, document and status endpoints only.
+        // Restricted session: the user's own profile/business, documents and status endpoints
+        // only. Business owners need read as well as update so they can keep editing their own
+        // record while the profile is under review.
         authorities.add("document:upload");
         authorities.add("document:read");
         if (user.getRole() == Role.RESEARCHER) {
             authorities.add("profile:edit");
         }
         if (user.getRole() == Role.BUSINESS) {
+            authorities.add("business:read");
             authorities.add("business:update");
             authorities.add("profile:edit");
         }

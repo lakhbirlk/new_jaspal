@@ -31,7 +31,7 @@ public class ResearcherProfile {
     @Column(length = 40)
     private String phone;
 
-    @Column(name = "purpose_of_research")
+    @Column(name = "purpose_of_research", columnDefinition = "text")
     private String purposeOfResearch;
 
     @Column(name = "updated_at", nullable = false)

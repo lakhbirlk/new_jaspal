@@ -4,6 +4,7 @@ import com.example.directory.auth.AuthPrincipal;
 import com.example.directory.business.AdminListingStatus;
 import com.example.directory.business.Business;
 import com.example.directory.business.BusinessRepository;
+import com.example.directory.business.Liability;
 import com.example.directory.business.VerificationStatus;
 import com.example.directory.common.CryptoService;
 import com.example.directory.config.AppProperties;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -117,6 +119,14 @@ public class BootstrapData implements ApplicationRunner {
                     "Assay development and pre-clinical research support.")
     );
 
+    /** Default corporate profile video used by the demo businesses. */
+    private static final String DEMO_PROFILE_VIDEO =
+            "https://www.youtube.com/watch?v=fQ9nQNx0KEs&list=RDfQ9nQNx0KEs&start_radio=1";
+
+    private static final List<String> DEMO_CA_NAMES = List.of(
+            "CA Rajesh Mehta", "CA Sunita Sharma", "CA Dhruv Patel", "CA Priya Tiwari",
+            "CA Neha Joshi", "CA Arvind Rao", "CA Meera Iyer", "CA Vikram Singh");
+
     private final UserRepository userRepository;
     private final ResearcherProfileRepository profileRepository;
     private final BusinessRepository businessRepository;
@@ -188,8 +198,15 @@ public class BootstrapData implements ApplicationRunner {
             business.setContactPersonPhone("+91 90000 00002");
             business.setAnnualRevenue(new BigDecimal("12500000"));
             business.setEmployeeCount(45);
+            seedFinancials(business, 12_500_000L, 3);
             business.setDescription("A demo business supplying laboratory equipment and consumables "
                     + "to research institutions across India.");
+            business.setProfileVideoUrl(DEMO_PROFILE_VIDEO);
+            business.setLiabilities(List.of(new Liability("Bank Term Loan", "State Bank of India",
+                    new BigDecimal("3500000"))));
+            business.setCaName("CA Rajesh Mehta");
+            business.setCaMembershipNo("123456");
+            business.setCaUdin("26123456ABCDE12345");
             business.setVerificationStatus(VerificationStatus.VERIFIED);
             business.setAdminListingStatus(AdminListingStatus.LISTED);
             business.setListedUntil(Instant.now().plus(730, ChronoUnit.DAYS));
@@ -204,6 +221,7 @@ public class BootstrapData implements ApplicationRunner {
 
         int seeded = seedDemoBusinesses();
         log.info("Seeded {} demo businesses for the public listing", seeded);
+        log.info("Backfilled published financials for {} demo businesses", backfillFinancials());
         log.info("Demo accounts use password {}", DEMO_PASSWORD);
     }
 
@@ -241,7 +259,17 @@ public class BootstrapData implements ApplicationRunner {
             business.setContactPersonPhone(phone);
             business.setAnnualRevenue(BigDecimal.valueOf(4_500_000L + (long) index * 1_750_000L));
             business.setEmployeeCount(8 + index * 6);
+            seedFinancials(business, 4_500_000L + (long) index * 1_750_000L, index);
             business.setDescription(demo.description());
+            // Leave every third demo company without a video so both states are visible.
+            if (index % 3 != 0) {
+                business.setProfileVideoUrl(DEMO_PROFILE_VIDEO);
+            }
+            business.setLiabilities(seedLiabilities(index,
+                    4_500_000L + (long) index * 1_750_000L));
+            business.setCaName(DEMO_CA_NAMES.get((index - 1) % DEMO_CA_NAMES.size()));
+            business.setCaMembershipNo(String.format("%06d", 120_000 + index * 37));
+            business.setCaUdin(String.format("26%06dABCDE%05d", 100_000 + index, index));
             business.setVerificationStatus(VerificationStatus.VERIFIED);
             business.setAdminListingStatus(AdminListingStatus.LISTED);
             business.setListedUntil(Instant.now().plus(365, ChronoUnit.DAYS));
@@ -249,6 +277,61 @@ public class BootstrapData implements ApplicationRunner {
             seeded++;
         }
         return seeded;
+    }
+
+    /**
+     * Demo-only liabilities derived from annual revenue. Every fifth company is debt-free so the
+     * "no outstanding loans" state is visible in the researcher company profile.
+     */
+    private List<Liability> seedLiabilities(int index, long annualRevenue) {
+        if (index % 5 == 0) {
+            return List.of();
+        }
+        String[] lenders = {"State Bank of India", "HDFC Bank", "ICICI Bank", "Axis Bank",
+                "Bajaj Finance", "Cholamandalam"};
+        List<Liability> liabilities = new ArrayList<>();
+        liabilities.add(new Liability("Bank Term Loan", lenders[index % lenders.length],
+                BigDecimal.valueOf(Math.round(annualRevenue * 0.28))));
+        if (index % 2 == 0) {
+            liabilities.add(new Liability("Cash Credit / OD",
+                    lenders[(index + 1) % lenders.length],
+                    BigDecimal.valueOf(Math.round(annualRevenue * 0.12))));
+        }
+        return liabilities;
+    }
+
+    /**
+     * Demo-only published financials: a deterministic 36-month turnover series, net profit and
+     * net worth derived from annual revenue, so the company database renders complete cards.
+     */
+    private void seedFinancials(Business business, long annualRevenue, int seed) {
+        business.setNetProfit(BigDecimal.valueOf(Math.round(annualRevenue * (0.07 + (seed % 5) * 0.015))));
+        business.setNetWorth(BigDecimal.valueOf(Math.round(annualRevenue * (1.2 + (seed % 7) * 0.22))));
+        List<Long> series = new ArrayList<>(36);
+        double value = annualRevenue / 12.0 * 0.76;
+        for (int month = 0; month < 36; month++) {
+            double seasonal = 1 + 0.06 * Math.sin((month + seed) / 3.0);
+            double noise = 1 + (((seed * 37 + month * 17) % 11) - 5) / 100.0;
+            series.add(Math.max(25_000L, Math.round(value * seasonal * noise)));
+            value *= 1.008;
+        }
+        business.setMonthlyTurnover(series);
+    }
+
+    /** Gives already-seeded demo listings financials added after the first seed run. */
+    private int backfillFinancials() {
+        int updated = 0;
+        for (Business business : businessRepository.findCurrentlyListed(Instant.now())) {
+            if (business.getMonthlyTurnover() != null && !business.getMonthlyTurnover().isEmpty()) {
+                continue;
+            }
+            long revenue = business.getAnnualRevenue() == null
+                    ? 6_000_000L : business.getAnnualRevenue().longValue();
+            seedFinancials(business, revenue, Math.abs(business.getId().hashCode()) % 97 + 1);
+            businessRepository.save(business);
+            updated++;
+        }
+        return updated;
     }
 
     private User seedUser(String email, String fullName, Role role) {

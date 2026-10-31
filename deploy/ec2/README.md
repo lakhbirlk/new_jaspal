@@ -1,6 +1,6 @@
-# Single-instance deployment (EC2 + Postgres + Elastic IP)
+# Single-instance deployment (EC2 + MySQL + Elastic IP)
 
-One `t4g.small` (2 vCPU, 2 GiB, Graviton/ARM64) runs PostgreSQL and the
+One `t4g.small` (2 vCPU, 2 GiB, Graviton/ARM64) runs MySQL and the
 application container. There is no load balancer and no RDS.
 
 | Resource | Cost (us-east-1, on-demand) |
@@ -37,7 +37,7 @@ Then open `terraform output app_url`.
 
 - The boot script builds the image natively for arm64, so no registry or
   build machine is needed.
-- PostgreSQL runs as `app-db` with a named volume `app-pgdata`.
+- MySQL runs as `app-db` with a named volume `app-mysqldata`.
 - The application runs as `app`, publishing port 8080.
 - A 4 GiB swap file is created because the Maven + Expo build does not fit in
   2 GiB of RAM. It is slow but reliable.

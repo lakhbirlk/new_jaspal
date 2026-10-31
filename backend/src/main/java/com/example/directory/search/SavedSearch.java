@@ -27,7 +27,7 @@ public class SavedSearch {
     private String name;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "query_json", nullable = false, columnDefinition = "jsonb")
+    @Column(name = "query_json", nullable = false, columnDefinition = "json")
     private String queryJson;
 
     @Column(name = "created_at", nullable = false)

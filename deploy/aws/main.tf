@@ -123,7 +123,7 @@ resource "aws_security_group" "app" {
 
 resource "aws_security_group" "db" {
   name_prefix = "${local.service_name}-db-"
-  description = "PostgreSQL, reachable only from the application tasks"
+  description = "MySQL, reachable only from the application tasks"
   vpc_id      = aws_vpc.app.id
 
   lifecycle {
@@ -155,10 +155,10 @@ resource "aws_vpc_security_group_ingress_rule" "app_from_alb" {
 
 resource "aws_vpc_security_group_ingress_rule" "db_from_app" {
   security_group_id            = aws_security_group.db.id
-  description                  = "PostgreSQL from application tasks"
+  description                  = "MySQL from application tasks"
   ip_protocol                  = "tcp"
-  from_port                    = 5432
-  to_port                      = 5432
+  from_port                    = 3306
+  to_port                      = 3306
   referenced_security_group_id = aws_security_group.app.id
 }
 
@@ -257,7 +257,7 @@ resource "aws_lb_listener" "https" {
 }
 
 # ---------------------------------------------------------------------------
-# PostgreSQL (single-AZ, smallest Graviton instance, encrypted)
+# MySQL (single-AZ, smallest Graviton instance, encrypted)
 # ---------------------------------------------------------------------------
 resource "random_password" "db" {
   length  = 32
@@ -274,8 +274,8 @@ resource "aws_db_subnet_group" "app" {
 resource "aws_db_instance" "app" {
   identifier = substr("${local.service_name}-db", 0, 63)
 
-  engine         = "postgres"
-  engine_version = "16"
+  engine         = "mysql"
+  engine_version = "8.4"
   instance_class = var.db_instance_class
 
   allocated_storage     = var.db_allocated_storage
@@ -286,7 +286,7 @@ resource "aws_db_instance" "app" {
   db_name  = var.db_name
   username = var.db_user
   password = random_password.db.result
-  port     = 5432
+  port     = 3306
 
   db_subnet_group_name   = aws_db_subnet_group.app.name
   vpc_security_group_ids = [aws_security_group.db.id]

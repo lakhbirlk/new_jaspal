@@ -1,7 +1,7 @@
 # Deploying to AWS ECS
 
 This directory deploys the single frontend+backend image to **ECS on Fargate**, with a managed
-PostgreSQL database, a public Application Load Balancer and secrets in SSM Parameter Store.
+MySQL database, a public Application Load Balancer and secrets in SSM Parameter Store.
 
 The defaults are chosen for the lowest practical monthly bill while still keeping the database
 managed and the container at **4 GB**:
@@ -11,7 +11,7 @@ managed and the container at **4 GB**:
 | Fargate **Spot** | Up to ~70% cheaper than on-demand Fargate; ECS reschedules a reclaimed task automatically. |
 | **2 vCPU / 4 GB** task | Extra CPU for faster JVM startup and request handling; memory stays at 4 GB. |
 | **No NAT gateway** | Tasks run in two public subnets and get public IPs; saves ~$33/month. Security groups keep them reachable only through the ALB. |
-| **RDS db.t4g.micro, single-AZ, 20 GiB gp3** | Cheapest managed PostgreSQL that still gives automated backups and patching. |
+| **RDS db.t4g.micro, single-AZ, 20 GiB gp3** | Cheapest managed MySQL that still gives automated backups and patching. |
 | **SSM SecureString** parameters | Free at the standard tier; no Secrets Manager charge. |
 | CloudWatch retention **7 days**, container insights **off**, ALB access logs **off** | Removes optional logging charges. |
 | One task, stop-then-start deployments | Never runs two 4 GB tasks during a release. |
@@ -44,11 +44,11 @@ Application Load Balancer  ──►  ECS service (1 task, Fargate Spot)
                                       │  2 vCPU / 4 GB
                                       │  Spring Boot serves the SPA and /api/v1
                                       ▼
-                              RDS PostgreSQL 16 (db.t4g.micro)
+                              RDS MySQL 8.4 (db.t4g.micro)
 
 Public subnets in 2 AZs, no NAT. ALB is the only public entry point;
 the task security group accepts 8080 only from the ALB;
-RDS accepts 5432 only from the task security group.
+RDS accepts 3306 only from the task security group.
 ```
 
 The image contains the exported web client inside the jar, so the ALB target group needs only
@@ -104,7 +104,7 @@ terraform output -raw alb_url
 
 This creates the VPC, ALB, RDS instance (5–10 minutes), SSM parameters, IAM roles, ECS cluster,
 task definition and service. The first task starts once RDS is available and the ALB health check
-passes. The check calls `/api/v1/public/plans`, which reads from PostgreSQL, so a task with a
+passes. The check calls `/api/v1/public/plans`, which reads from MySQL, so a task with a
 broken database connection stays unhealthy instead of serving a working page with a dead API.
 Allow about three minutes after the apply finishes for the first boot.
 

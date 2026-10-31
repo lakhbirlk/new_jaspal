@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import type { Access, BusinessRecord } from '../api/types';
+import type { Access, BusinessLiability, BusinessRecord } from '../api/types';
 import {
   BUSINESS_DISPLAY_ORDER,
   BUSINESS_FIELDS,
@@ -18,6 +18,14 @@ export function businessToForm(record: BusinessRecord): BusinessFormValues {
   const values: BusinessFormValues = {};
   BUSINESS_FIELDS.forEach((field) => {
     const raw = record[field.key];
+    if (field.key === 'liabilities' && Array.isArray(raw)) {
+      values[field.key] = (raw as BusinessLiability[])
+        .map((liability) => [liability.type, liability.lender, liability.amount]
+          .filter((part) => part !== undefined && part !== null && part !== '')
+          .join(' | '))
+        .join('\n');
+      return;
+    }
     values[field.key] = raw === null || raw === undefined ? '' : String(raw);
   });
   return values;
@@ -79,7 +87,11 @@ export function BusinessDetails({
   const groups: { title: string; keys: string[] }[] = [
     {
       title: 'Company',
-      keys: ['legal_name', 'trade_name', 'registration_number', 'tax_id', 'industry', 'category', 'website', 'description'],
+      keys: [
+        'legal_name', 'trade_name', 'registration_number', 'tax_id', 'industry', 'category',
+        'website', 'description', 'profile_video_url',
+        'ca_name', 'ca_membership_no', 'ca_udin',
+      ],
     },
     {
       title: 'Location and contact',
@@ -90,7 +102,7 @@ export function BusinessDetails({
     },
     {
       title: 'Financial',
-      keys: ['annual_revenue', 'employee_count', 'bank_details'],
+      keys: ['annual_revenue', 'employee_count', 'bank_details', 'liabilities'],
     },
     {
       title: 'Status',
@@ -187,11 +199,14 @@ export function BusinessCard({
   );
 }
 
-export function MissingFields({ missing }: { missing: string[] }) {
+export function MissingFields({ missing, title = 'Needed before review' }: {
+  missing: string[];
+  title?: string;
+}) {
   if (!missing.length) return null;
   return (
     <View style={{ marginBottom: spacing.md }}>
-      <SectionTitle>Needed before review</SectionTitle>
+      <SectionTitle>{title}</SectionTitle>
       <View style={styles.missingWrap}>
         {missing.map((field) => (
           <Badge key={field} label={humanizeField(field)} tone="warning" />

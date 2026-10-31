@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -76,10 +79,41 @@ public class Business {
     @Column(name = "employee_count")
     private Integer employeeCount;
 
-    @Column(name = "bank_details")
+    @Column(name = "net_profit")
+    private BigDecimal netProfit;
+
+    @Column(name = "net_worth")
+    private BigDecimal netWorth;
+
+    /** Monthly turnover in rupees, oldest first, up to 36 entries. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "monthly_turnover", columnDefinition = "json")
+    private List<Long> monthlyTurnover;
+
+    @Column(name = "bank_details", columnDefinition = "text")
     private String bankDetails;
 
+    @Column(columnDefinition = "text")
     private String description;
+
+    /** URL of the company's corporate profile video, shown to research members. */
+    @Column(name = "profile_video_url", length = 500)
+    private String profileVideoUrl;
+
+    /** Declared loans and liabilities, published for research transparency. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "liabilities", columnDefinition = "json")
+    private List<Liability> liabilities;
+
+    /** The chartered accountant who certifies this company's financial statements. */
+    @Column(name = "ca_name", length = 200)
+    private String caName;
+
+    @Column(name = "ca_membership_no", length = 40)
+    private String caMembershipNo;
+
+    @Column(name = "ca_udin", length = 40)
+    private String caUdin;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "verification_status", nullable = false, length = 20)

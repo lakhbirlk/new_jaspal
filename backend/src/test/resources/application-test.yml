@@ -1,0 +1,12 @@
+# Integration tests run against a dedicated MySQL schema. Flyway builds it from the same
+# migrations as production. If the migrations change, drop and recreate `directory_test`.
+spring:
+  datasource:
+    url: ${TEST_DB_URL:jdbc:mysql://localhost:3306/directory_test?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false}
+    username: ${TEST_DB_USER:directory}
+    password: ${TEST_DB_PASSWORD:directory}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true

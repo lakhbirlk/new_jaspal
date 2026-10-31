@@ -25,9 +25,19 @@ public class SearchController {
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String industry,
             @RequestParam(required = false) String city,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) java.math.BigDecimal minRevenue,
+            @RequestParam(required = false) java.math.BigDecimal maxRevenue,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @AuthenticationPrincipal AuthPrincipal principal) {
-        return searchService.search(principal, q, industry, city, page, size);
+        return searchService.search(principal, q, industry, city, state, minRevenue, maxRevenue,
+                page, size);
+    }
+
+    @GetMapping("/facets")
+    @PreAuthorize("hasAuthority('business:search')")
+    public Map<String, Object> facets() {
+        return searchService.facets();
     }
 }

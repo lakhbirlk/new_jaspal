@@ -9,9 +9,9 @@ import { colors, spacing, typography } from '../../theme';
 
 type Props = NativeStackScreenProps<PublicStackParamList, 'Register'>;
 
-export default function RegisterScreen({ navigation }: Props) {
+export default function RegisterScreen({ navigation, route }: Props) {
   const { signUp, busy } = useAuth();
-  const [role, setRole] = useState<'researcher' | 'business'>('researcher');
+  const [role, setRole] = useState<'researcher' | 'business'>(route.params?.role ?? 'researcher');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [businessName, setBusinessName] = useState('');

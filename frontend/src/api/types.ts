@@ -116,6 +116,18 @@ export interface MySubscription {
   subscription: Subscription | null;
 }
 
+/** Result of starting a research-plan checkout, before the payment is confirmed. */
+export interface PlanCheckout {
+  subscription: Subscription;
+  plan: Plan;
+  payment: Payment;
+  message: string;
+  /** Set when an active subscriber is buying a higher tier while their plan still runs. */
+  upgrade?: boolean;
+  currentPlan?: Plan;
+  creditsCarried?: number;
+}
+
 export interface LedgerEntry {
   id: string;
   userId: string;
@@ -201,6 +213,13 @@ export interface SavedSearch {
   createdAt: string;
 }
 
+/** One declared loan or liability, published by the company. */
+export interface BusinessLiability {
+  type?: string;
+  lender?: string;
+  amount?: number;
+}
+
 export type BusinessRecord = {
   id: string;
   legal_name?: string;
@@ -221,8 +240,23 @@ export type BusinessRecord = {
   contact_person_phone?: string;
   annual_revenue?: number;
   employee_count?: number;
+  /** Published financials for research visibility. */
+  net_profit?: number;
+  net_worth?: number;
+  /** Monthly turnover in rupees, oldest first, up to 36 entries. */
+  monthly_turnover?: number[];
+  public_code?: string;
+  unlocked?: boolean;
   bank_details?: string;
   description?: string;
+  /** Corporate profile video link; members-only, so absent for locked researchers. */
+  profile_video_url?: string;
+  /** Declared loans and liabilities, published for research transparency. */
+  liabilities?: BusinessLiability[] | null;
+  /** The chartered accountant who certifies the company's financial statements. */
+  ca_name?: string;
+  ca_membership_no?: string;
+  ca_udin?: string;
   verification_status?: string;
   listed_until?: string;
   admin_listing_status?: string;
@@ -235,6 +269,25 @@ export type BusinessRecord = {
   profile_completion?: Completion;
   [key: string]: unknown;
 };
+
+/** Anonymous catalogue entry. Identity, contacts and statements are deliberately absent. */
+export interface PublicBusiness {
+  id: string;
+  public_code: string;
+  industry?: string;
+  category?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  employee_count?: number;
+  annual_revenue?: number;
+}
+
+/** Filter options for the researcher company database. */
+export interface BusinessFacets {
+  industries: string[];
+  states: string[];
+}
 
 export interface AdminUser {
   id: string;
@@ -306,6 +359,63 @@ export interface AdminDashboard {
   listingsExpiringIn30Days: number;
   creditsSpentThisMonth: number;
   recentAuditEvents: AuditLogEntry[];
+}
+
+export type RevenueWindow = 'total' | 'today' | 'week' | 'month';
+
+export interface PaymentDashboardMetrics {
+  /** Revenue per currency, never summed across currencies. */
+  revenueByCurrency: Record<RevenueWindow, Record<string, number>>;
+  currencies: string[];
+  totalTransactions: number;
+  successfulPayments: number;
+  failedPayments: number;
+  pendingPayments: number;
+  refundedPayments: number;
+  successRate: number;
+}
+
+export interface RevenuePoint {
+  label: string;
+  bucketStart: string;
+  amount: number;
+}
+
+export interface PaymentAnalytics {
+  period: 'daily' | 'weekly' | 'monthly' | 'custom' | string;
+  granularity: 'day' | 'week' | 'month' | string;
+  start: string;
+  end: string;
+  currency?: string | null;
+  currencies: string[];
+  totalRevenue: number;
+  points: RevenuePoint[];
+}
+
+/** Row returned by the admin payment transaction log. */
+export interface PaymentTransaction extends Payment {
+  orderId?: string;
+  customerName?: string;
+  customerEmail?: string;
+  gateway?: string;
+  refundedAt?: string;
+  refundReason?: string;
+  failureReason?: string;
+}
+
+export interface PaymentTransactionDetail extends PaymentTransaction {
+  gatewayResponse?: {
+    status: string;
+    reference?: string;
+    failureReason?: string;
+  };
+  refund?: {
+    refundedAt?: string;
+    reason?: string;
+    amount: number;
+    currency: string;
+    type: 'full' | 'partial';
+  } | null;
 }
 
 export interface AdminSubscriptionList {

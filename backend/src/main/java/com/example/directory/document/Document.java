@@ -32,7 +32,7 @@ public class Document {
     private String originalFilename;
 
     @Basic(fetch = FetchType.LAZY)
-    @Column(nullable = false, columnDefinition = "bytea")
+    @Column(nullable = false, columnDefinition = "longblob")
     private byte[] content;
 
     @Column(name = "mime_type", nullable = false, length = 120)
@@ -54,7 +54,7 @@ public class Document {
     @Column(name = "reviewed_at")
     private Instant reviewedAt;
 
-    @Column(name = "rejection_reason")
+    @Column(name = "rejection_reason", columnDefinition = "text")
     private String rejectionReason;
 
     @Column(name = "created_at", nullable = false)

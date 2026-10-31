@@ -1,5 +1,12 @@
 locals {
   service_name = "${var.name}-${var.environment}"
+
+  # sslip.io resolves <ip-with-dashes>.sslip.io to that IP, so Caddy can get a
+  # publicly trusted certificate without owning a domain. Override with
+  # https_domain to use your own name instead.
+  sslip_host = "${replace(aws_eip.app.public_ip, ".", "-")}.sslip.io"
+  https_host = var.https_domain != "" ? var.https_domain : local.sslip_host
+  https_url  = "https://${local.https_host}"
 }
 
 data "aws_availability_zones" "available" {
@@ -204,7 +211,10 @@ resource "aws_instance" "app" {
 
   user_data = templatefile("${path.module}/user_data.sh.tpl", {
     app_port     = var.app_port
-    app_url      = "http://${aws_eip.app.public_ip}:${var.app_port}"
+    app_url      = local.https_url
+    direct_url   = "http://${aws_eip.app.public_ip}:${var.app_port}"
+    https_host   = local.https_host
+    tls_email    = var.tls_email
     git_repo_url = var.git_repo_url
     git_branch   = var.git_branch
 
@@ -218,8 +228,8 @@ resource "aws_instance" "app" {
     admin_name  = var.admin_name
     admin_pass  = random_password.admin.result
 
-    seed_demo      = var.seed_demo
-    postgres_image = var.postgres_image
+    seed_demo    = var.seed_demo
+    mysql_image  = var.mysql_image
   })
 
   root_block_device {
@@ -235,8 +245,11 @@ resource "aws_instance" "app" {
 
   tags = { Name = local.service_name }
 
-  # The boot script takes 15-25 minutes to build the image on ARM; Terraform
-  # returns as soon as the instance is running, so the URL is not live yet.
+  # The boot script builds the image on ARM; Terraform returns as soon as the
+  # instance is running, so the URL is not live yet. user_data changes must
+  # replace the instance, because the script only runs on first boot.
+  user_data_replace_on_change = true
+
   lifecycle {
     ignore_changes = [ami]
   }

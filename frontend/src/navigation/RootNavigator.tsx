@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   DefaultTheme,
   NavigationContainer,
@@ -7,6 +7,7 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../auth/AuthContext';
 import { Button } from '../components/ui';
 import { colors, layout, spacing, typography } from '../theme';
@@ -25,6 +26,8 @@ import type {
 } from './types';
 
 import LandingScreen from '../screens/public/LandingScreen';
+import CompanyDatabaseScreen from '../screens/public/CompanyDatabaseScreen';
+import PublicBusinessDetailScreen from '../screens/public/PublicBusinessDetailScreen';
 import LoginScreen from '../screens/public/LoginScreen';
 import RegisterScreen from '../screens/public/RegisterScreen';
 import VerifyEmailScreen from '../screens/public/VerifyEmailScreen';
@@ -39,6 +42,7 @@ import SearchScreen from '../screens/researcher/SearchScreen';
 import UnlockedScreen from '../screens/researcher/UnlockedScreen';
 import SubscriptionScreen from '../screens/researcher/SubscriptionScreen';
 import PlansScreen from '../screens/researcher/PlansScreen';
+import CheckoutScreen from '../screens/researcher/CheckoutScreen';
 import LedgerScreen from '../screens/researcher/LedgerScreen';
 import SavedSearchesScreen from '../screens/researcher/SavedSearchesScreen';
 import BusinessEditScreen from '../screens/business/BusinessEditScreen';
@@ -62,6 +66,7 @@ import AdminSettingsScreen from '../screens/admin/AdminSettingsScreen';
 import AccountScreen from '../screens/shared/AccountScreen';
 import MyDocumentsScreen from '../screens/shared/MyDocumentsScreen';
 import BusinessDetailScreen from '../screens/shared/BusinessDetailScreen';
+import CompanyProfileScreen from '../screens/researcher/CompanyProfileScreen';
 
 const navigationTheme: Theme = {
   ...DefaultTheme,
@@ -82,6 +87,29 @@ const stackScreenOptions = {
   headerTitleStyle: { fontWeight: '700' as const },
   headerShadowVisible: false,
   contentStyle: { backgroundColor: colors.background },
+};
+
+function HeaderSignOut() {
+  const { signOut, busy } = useAuth();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Sign out"
+      disabled={busy}
+      onPress={() => { void signOut(); }}
+      hitSlop={8}
+      style={({ pressed }) => [styles.headerSignOut, (pressed || busy) && { opacity: 0.6 }]}
+    >
+      <Text style={styles.headerSignOutText}>Sign out</Text>
+    </Pressable>
+  );
+}
+
+// Native stack screens inside a signed-in workspace get the sign-out action in
+// the header; the public stack keeps its default header options.
+const signedInStackOptions = {
+  ...stackScreenOptions,
+  headerRight: () => <HeaderSignOut />,
 };
 
 const tabScreenOptions = {
@@ -136,6 +164,61 @@ function ResearcherProfileTab() {
   return <ResearcherProfileScreen showAccountLink topInset={false} />;
 }
 
+// ------------------------------------------------------------------ signed-in bar
+
+/**
+ * Tab screens do not use a native header, so they get a thin top bar that keeps
+ * the sign-out action in the upper-right on every workspace screen. The bar
+ * consumes the top safe-area inset, so the wrapped screen is told its top inset
+ * is zero to avoid doubling the status-bar padding.
+ */
+function withSignOutBar<P extends object>(Component: React.ComponentType<P>) {
+  function WithSignOutBar(props: P) {
+    const insets = useSafeAreaInsets();
+    const { signOut, busy } = useAuth();
+    return (
+      <View style={styles.workspace}>
+        <View style={[styles.workspaceBar, { paddingTop: insets.top + spacing.sm }]}>
+          <Text style={styles.workspaceBrand}>DataOfBusiness</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Sign out"
+            disabled={busy}
+            onPress={() => { void signOut(); }}
+            hitSlop={8}
+            style={({ pressed }) => [styles.signOutButton, (pressed || busy) && { opacity: 0.6 }]}
+          >
+            <Text style={styles.signOutText}>Sign out</Text>
+          </Pressable>
+        </View>
+        <SafeAreaInsetsContext.Provider value={{ ...insets, top: 0 }}>
+          <View style={styles.workspaceBody}>
+            <Component {...props} />
+          </View>
+        </SafeAreaInsetsContext.Provider>
+      </View>
+    );
+  }
+  WithSignOutBar.displayName = `WithSignOutBar(${Component.displayName ?? Component.name ?? 'Screen'})`;
+  return WithSignOutBar;
+}
+
+const ResearcherSearchTab = withSignOutBar(SearchScreen);
+const ResearcherUnlockedTab = withSignOutBar(UnlockedScreen);
+const ResearcherSubscriptionTab = withSignOutBar(SubscriptionScreen);
+const ResearcherProfileScreenTab = withSignOutBar(ResearcherProfileTab);
+const BusinessOverviewScreenTab = withSignOutBar(BusinessOverviewTab);
+const BusinessDocumentsScreenTab = withSignOutBar(BusinessDocumentsTab);
+const BusinessListingTab = withSignOutBar(ListingScreen);
+const BusinessAccountTab = withSignOutBar(AccountScreen);
+const AuditorBusinessesTab = withSignOutBar(AuditorBusinessListScreen);
+const AuditorAccountTab = withSignOutBar(AccountScreen);
+const AdminDashboardTab = withSignOutBar(AdminDashboardScreen);
+const AdminUsersTab = withSignOutBar(AdminUsersScreen);
+const AdminBusinessesTab = withSignOutBar(AdminBusinessesScreen);
+const AdminPaymentsTab = withSignOutBar(AdminPaymentsScreen);
+const AdminMoreTab = withSignOutBar(AdminMoreScreen);
+
 // ------------------------------------------------------------------ stacks
 
 const PublicStack = createNativeStackNavigator<PublicStackParamList>();
@@ -181,7 +264,17 @@ function PublicNavigator() {
       <PublicStack.Screen
         name="Landing"
         component={LandingScreen}
-        options={{ headerShown: false, title: 'Business Directory' }}
+        options={{ headerShown: false, title: 'DataOfBusiness' }}
+      />
+      <PublicStack.Screen
+        name="CompanyDatabase"
+        component={CompanyDatabaseScreen}
+        options={{ title: 'Company database' }}
+      />
+      <PublicStack.Screen
+        name="PublicBusinessDetail"
+        component={PublicBusinessDetailScreen}
+        options={({ route }) => ({ title: route.params.publicCode ?? 'Company profile' })}
       />
       <PublicStack.Screen name="Login" component={LoginScreen} options={{ title: 'Sign in' }} />
       <PublicStack.Screen name="Register" component={RegisterScreen} options={{ title: 'Create account' }} />
@@ -226,7 +319,7 @@ const OnboardingStack = createNativeStackNavigator<OnboardingStackParamList>();
 
 function OnboardingNavigator() {
   return (
-    <OnboardingStack.Navigator screenOptions={stackScreenOptions}>
+    <OnboardingStack.Navigator screenOptions={signedInStackOptions}>
       <OnboardingStack.Screen
         name="OnboardingHome"
         component={OnboardingHomeScreen}
@@ -261,22 +354,22 @@ function ResearcherTabNavigator() {
     <ResearcherTabs.Navigator screenOptions={tabScreenOptions}>
       <ResearcherTabs.Screen
         name="Search"
-        component={SearchScreen}
+        component={ResearcherSearchTab}
         options={{ title: 'Search', tabBarIcon: tabIcon('S') }}
       />
       <ResearcherTabs.Screen
         name="Unlocked"
-        component={UnlockedScreen}
+        component={ResearcherUnlockedTab}
         options={{ title: 'Unlocked', tabBarIcon: tabIcon('U') }}
       />
       <ResearcherTabs.Screen
         name="Subscription"
-        component={SubscriptionScreen}
+        component={ResearcherSubscriptionTab}
         options={{ title: 'Credits', tabBarIcon: tabIcon('C') }}
       />
       <ResearcherTabs.Screen
         name="Profile"
-        component={ResearcherProfileTab}
+        component={ResearcherProfileScreenTab}
         options={{ title: 'Profile', tabBarIcon: tabIcon('P') }}
       />
     </ResearcherTabs.Navigator>
@@ -287,7 +380,7 @@ const ResearcherStack = createNativeStackNavigator<ResearcherStackParamList>();
 
 function ResearcherNavigator() {
   return (
-    <ResearcherStack.Navigator screenOptions={stackScreenOptions}>
+    <ResearcherStack.Navigator screenOptions={signedInStackOptions}>
       <ResearcherStack.Screen
         name="ResearcherTabs"
         component={ResearcherTabNavigator}
@@ -295,10 +388,15 @@ function ResearcherNavigator() {
       />
       <ResearcherStack.Screen
         name="BusinessDetail"
-        component={BusinessDetailScreen}
-        options={({ route }) => ({ title: route.params.title ?? 'Business profile' })}
+        component={CompanyProfileScreen}
+        options={({ route }) => ({ title: route.params.title ?? 'Company profile' })}
       />
       <ResearcherStack.Screen name="Plans" component={PlansScreen} options={{ title: 'Plans & credits' }} />
+      <ResearcherStack.Screen
+        name="Checkout"
+        component={CheckoutScreen}
+        options={{ title: 'Checkout' }}
+      />
       <ResearcherStack.Screen name="Ledger" component={LedgerScreen} options={{ title: 'Credit ledger' }} />
       <ResearcherStack.Screen
         name="SavedSearches"
@@ -319,22 +417,22 @@ function BusinessTabNavigator() {
     <BusinessTabs.Navigator screenOptions={tabScreenOptions}>
       <BusinessTabs.Screen
         name="Overview"
-        component={BusinessOverviewTab}
+        component={BusinessOverviewScreenTab}
         options={{ title: 'Profile', tabBarIcon: tabIcon('B') }}
       />
       <BusinessTabs.Screen
         name="Documents"
-        component={BusinessDocumentsTab}
+        component={BusinessDocumentsScreenTab}
         options={{ title: 'Documents', tabBarIcon: tabIcon('D') }}
       />
       <BusinessTabs.Screen
         name="Listing"
-        component={ListingScreen}
+        component={BusinessListingTab}
         options={{ title: 'Listing', tabBarIcon: tabIcon('L') }}
       />
       <BusinessTabs.Screen
         name="Account"
-        component={AccountScreen}
+        component={BusinessAccountTab}
         options={{ title: 'Account', tabBarIcon: tabIcon('A') }}
       />
     </BusinessTabs.Navigator>
@@ -345,7 +443,7 @@ const BusinessStack = createNativeStackNavigator<BusinessStackParamList>();
 
 function BusinessNavigator() {
   return (
-    <BusinessStack.Navigator screenOptions={stackScreenOptions}>
+    <BusinessStack.Navigator screenOptions={signedInStackOptions}>
       <BusinessStack.Screen
         name="BusinessTabs"
         component={BusinessTabNavigator}
@@ -365,12 +463,12 @@ function AuditorTabNavigator() {
     <AuditorTabs.Navigator screenOptions={tabScreenOptions}>
       <AuditorTabs.Screen
         name="Businesses"
-        component={AuditorBusinessListScreen}
+        component={AuditorBusinessesTab}
         options={{ title: 'Businesses', tabBarIcon: tabIcon('B') }}
       />
       <AuditorTabs.Screen
         name="Account"
-        component={AccountScreen}
+        component={AuditorAccountTab}
         options={{ title: 'Account', tabBarIcon: tabIcon('A') }}
       />
     </AuditorTabs.Navigator>
@@ -381,7 +479,7 @@ const AuditorStack = createNativeStackNavigator<AuditorStackParamList>();
 
 function AuditorNavigator() {
   return (
-    <AuditorStack.Navigator screenOptions={stackScreenOptions}>
+    <AuditorStack.Navigator screenOptions={signedInStackOptions}>
       <AuditorStack.Screen
         name="AuditorTabs"
         component={AuditorTabNavigator}
@@ -405,22 +503,27 @@ function AdminTabNavigator() {
     <AdminTabs.Navigator screenOptions={tabScreenOptions}>
       <AdminTabs.Screen
         name="Dashboard"
-        component={AdminDashboardScreen}
+        component={AdminDashboardTab}
         options={{ title: 'Dashboard', tabBarIcon: tabIcon('D') }}
       />
       <AdminTabs.Screen
         name="Users"
-        component={AdminUsersScreen}
+        component={AdminUsersTab}
         options={{ title: 'Users', tabBarIcon: tabIcon('U') }}
       />
       <AdminTabs.Screen
         name="Businesses"
-        component={AdminBusinessesScreen}
+        component={AdminBusinessesTab}
         options={{ title: 'Businesses', tabBarIcon: tabIcon('B') }}
       />
       <AdminTabs.Screen
+        name="Payments"
+        component={AdminPaymentsTab}
+        options={{ title: 'Payments', tabBarIcon: tabIcon('P') }}
+      />
+      <AdminTabs.Screen
         name="More"
-        component={AdminMoreScreen}
+        component={AdminMoreTab}
         options={{ title: 'More', tabBarIcon: tabIcon('M') }}
       />
     </AdminTabs.Navigator>
@@ -431,7 +534,7 @@ const AdminStack = createNativeStackNavigator<AdminStackParamList>();
 
 function AdminNavigator() {
   return (
-    <AdminStack.Navigator screenOptions={stackScreenOptions}>
+    <AdminStack.Navigator screenOptions={signedInStackOptions}>
       <AdminStack.Screen name="AdminTabs" component={AdminTabNavigator} options={{ headerShown: false }} />
       <AdminStack.Screen name="UserDetail" component={UserDetailScreen} options={{ title: 'User' }} />
       <AdminStack.Screen
@@ -463,9 +566,9 @@ function Splash({ message }: { message?: string }) {
   return (
     <View style={styles.splash}>
       <View style={styles.logo}>
-        <Text style={styles.logoText}>BD</Text>
+        <Text style={styles.logoText}>DoB</Text>
       </View>
-      <Text style={styles.brand}>Business Directory</Text>
+      <Text style={styles.brand}>DataOfBusiness</Text>
       {message ? <Text style={styles.splashMessage}>{message}</Text> : <ActivityIndicator color={colors.primary} style={{ marginTop: spacing.lg }} />}
     </View>
   );
@@ -541,7 +644,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoText: { color: colors.white, fontWeight: '800', fontSize: 24, letterSpacing: 0.5 },
+  logoText: { color: colors.white, fontWeight: '800', fontSize: 19, letterSpacing: 0.5 },
   brand: { ...typography.title, marginTop: spacing.md },
   splashMessage: { ...typography.small, marginTop: spacing.sm, textAlign: 'center' },
   tabIcon: {
@@ -553,4 +656,33 @@ const styles = StyleSheet.create({
   },
   tabIconActive: { backgroundColor: colors.primarySoft },
   tabIconText: { fontSize: 12, fontWeight: '800' },
+  workspace: { flex: 1, backgroundColor: colors.background },
+  workspaceBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+    backgroundColor: colors.surface,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  workspaceBrand: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: colors.primaryDark,
+    letterSpacing: 0.2,
+  },
+  workspaceBody: { flex: 1 },
+  signOutButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: colors.primarySoft,
+    borderWidth: 1,
+    borderColor: '#C9CFE0',
+  },
+  signOutText: { fontSize: 13, fontWeight: '700', color: colors.primaryDark },
+  headerSignOut: { paddingHorizontal: spacing.sm, paddingVertical: 4 },
+  headerSignOutText: { fontSize: 14, fontWeight: '600', color: colors.primary },
 });

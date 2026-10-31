@@ -27,7 +27,7 @@ public class ResearcherController {
         if (code == null || code.toString().isBlank()) {
             throw ApiException.badRequest("PLAN_CODE_REQUIRED", "planCode is required");
         }
-        return subscriptionService.subscribe(principal, code.toString().trim());
+        return subscriptionService.startCheckout(principal, code.toString().trim());
     }
 
     @GetMapping("/subscriptions/me")

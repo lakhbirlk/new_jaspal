@@ -54,6 +54,15 @@ public class Payment {
     @Column(name = "paid_at")
     private Instant paidAt;
 
+    @Column(name = "refunded_at")
+    private Instant refundedAt;
+
+    @Column(name = "refund_reason", columnDefinition = "text")
+    private String refundReason;
+
+    @Column(name = "failure_reason", columnDefinition = "text")
+    private String failureReason;
+
     @PrePersist
     void onCreate() {
         if (id == null) id = UUID.randomUUID();

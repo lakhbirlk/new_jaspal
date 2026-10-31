@@ -6,7 +6,7 @@ spring:
   application:
     name: business-directory
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/directory}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/directory?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false}
     username: ${DB_USER:directory}
     password: ${DB_PASSWORD:directory}
     hikari:
@@ -19,6 +19,8 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
+        type:
+          preferred_uuid_jdbc_type: CHAR
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -64,6 +66,7 @@ app:
     allowed-origins: ${CORS_ORIGINS:http://localhost:8081,http://localhost:19006,http://localhost:5173}
   payments:
     webhook-secret: ${PAYMENT_WEBHOOK_SECRET:}
+    demo-gateway-enabled: ${PAYMENT_DEMO_ENABLED:true}
   listing:
     reminder-days: 7
 

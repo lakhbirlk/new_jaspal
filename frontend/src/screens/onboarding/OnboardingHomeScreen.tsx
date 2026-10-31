@@ -65,7 +65,9 @@ export default function OnboardingHomeScreen({ navigation }: Props) {
         </Text>
         <Text style={styles.heroSubtitle}>
           {pendingReview
-            ? 'An administrator will review your details and documents. You can sign back in to check progress.'
+            ? isBusiness
+              ? 'An administrator will review your details and documents. You can keep updating your business details while the review is in progress.'
+              : 'An administrator will review your details and documents. You can sign back in to check progress.'
             : 'Complete the required fields and upload your documents, then submit your profile for administrator review.'}
         </Text>
         <View style={styles.badgeRow}>
@@ -80,14 +82,15 @@ export default function OnboardingHomeScreen({ navigation }: Props) {
 
       {!pendingReview ? <ProfileCompletionCard completion={completion} /> : null}
 
-      {!pendingReview ? (
+      {!pendingReview || isBusiness ? (
         <Card>
           <Text style={typography.h3}>
             {isBusiness ? 'Business details and documents' : 'Profile details and documents'}
           </Text>
           <Muted style={{ marginTop: spacing.xs }}>
-            You can save progress at any time. Submission is available once every required item is
-            present.
+            {pendingReview
+              ? 'Your business is under review. You can keep updating its details; documents stay locked until the review is complete.'
+              : 'You can save progress at any time. Submission is available once every required item is present.'}
           </Muted>
           <View style={styles.actions}>
             <Button
@@ -95,12 +98,14 @@ export default function OnboardingHomeScreen({ navigation }: Props) {
               onPress={() => navigation.navigate(isBusiness ? 'BusinessEdit' : 'ResearcherProfileEdit')}
               style={styles.action}
             />
-            <Button
-              title="Manage documents"
-              variant="secondary"
-              onPress={() => navigation.navigate('Documents')}
-              style={styles.action}
-            />
+            {!pendingReview ? (
+              <Button
+                title="Manage documents"
+                variant="secondary"
+                onPress={() => navigation.navigate('Documents')}
+                style={styles.action}
+              />
+            ) : null}
           </View>
         </Card>
       ) : null}

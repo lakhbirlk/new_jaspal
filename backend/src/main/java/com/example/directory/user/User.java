@@ -53,7 +53,7 @@ public class User {
     @Column(name = "submitted_at")
     private Instant submittedAt;
 
-    @Column(name = "review_note")
+    @Column(name = "review_note", columnDefinition = "text")
     private String reviewNote;
 
     @Column(name = "token_version", nullable = false)

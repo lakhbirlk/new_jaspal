@@ -78,13 +78,13 @@ variable "desired_count" {
 }
 
 variable "db_name" {
-  description = "PostgreSQL database name."
+  description = "MySQL database name."
   type        = string
   default     = "directory"
 }
 
 variable "db_user" {
-  description = "PostgreSQL master user name."
+  description = "MySQL master user name."
   type        = string
   default     = "directory"
 }

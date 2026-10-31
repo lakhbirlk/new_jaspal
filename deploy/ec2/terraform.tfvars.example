@@ -13,3 +13,8 @@ ssh_cidr = ""
 
 admin_email = "admin@example.com"
 seed_demo   = true
+
+# Leave empty to use the free <ip-with-dashes>.sslip.io hostname. Set your own
+# name (with an A record pointing at the Elastic IP) to use a real domain.
+https_domain = ""
+tls_email    = "admin@example.com"
