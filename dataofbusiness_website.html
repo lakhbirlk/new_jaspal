@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataOfBusiness — India's Private Company Intelligence Platform</title>
+<meta name="description" content="DataOfBusiness is a corporate intelligence and research platform. Access CA-certified financial information, company profiles, and business data of Indian companies for research and due-diligence purposes.">
+<style>
+:root{
+  --navy:#1E2761; --navy-2:#2A3580; --navy-deep:#141B47;
+  --gold:#E8B84B; --gold-d:#C49A35;
+  --teal:#0D9488; --blue:#2563EB; --red:#DC2626; --green:#16A34A;
+  --bg:#F6F7FB; --card:#FFFFFF; --ink:#1A2238; --mut:#5A6478; --faint:#98A1B3;
+  --line:#E3E7F0; --r:12px; --r-sm:8px;
+  --shadow:0 1px 3px rgba(20,27,71,.07),0 8px 24px rgba(20,27,71,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:#fff;color:var(--ink);width:100%;outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(30,39,97,.08)}
+label{font-size:12.5px;font-weight:600;color:var(--mut);display:block;margin-bottom:5px}
+.req::after{content:" *";color:var(--red)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.hidden{display:none!important}
+
+/* nav */
+nav{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--line)}
+.nav-in{max-width:1080px;margin:0 auto;padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.logo-mark{min-width:42px;height:34px;padding:0 7px;background:var(--navy);border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:800;font-size:15px;letter-spacing:.5px}
+.logo-mark b{color:#fff;font-weight:800}
+.logo-text{font-weight:700;font-size:16px;color:var(--navy)}
+.logo-text small{display:block;font-size:9.5px;font-weight:500;color:var(--faint);letter-spacing:.4px;line-height:1}
+.nav-links{display:flex;gap:6px;align-items:center}
+.btn{border:none;border-radius:var(--r-sm);padding:9px 18px;font-size:13.5px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:7px}
+.btn-navy{background:var(--navy);color:#fff}.btn-navy:hover{background:var(--navy-2)}
+.btn-gold{background:var(--gold);color:var(--navy)}.btn-gold:hover{background:var(--gold-d)}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}.btn-ghost:hover{background:var(--bg)}
+.btn-lg{padding:13px 26px;font-size:15px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.member-pill{background:#E8F7F1;color:#0B6B4F;font-size:12px;font-weight:700;padding:5px 12px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
+
+/* hero */
+.hero{background:linear-gradient(160deg,var(--navy-deep) 0%,var(--navy) 55%,#2E3D8F 100%);color:#fff;padding:64px 20px 56px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;right:-120px;top:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(232,184,75,.18),transparent 65%)}
+.hero-in{max-width:1080px;margin:0 auto;position:relative}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);padding:6px 14px;border-radius:99px;font-size:12.5px;font-weight:600;margin-bottom:22px}
+.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.hero h1{font-size:clamp(28px,4.5vw,44px);font-weight:800;line-height:1.15;letter-spacing:-.5px;max-width:760px}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero p.sub{font-size:17px;color:#C8D1F0;max-width:620px;margin:18px 0 30px;line-height:1.7}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
+.hero-stats{display:flex;gap:36px;margin-top:42px;flex-wrap:wrap}
+.hstat b{font-size:26px;font-weight:800;display:block}
+.hstat span{font-size:12.5px;color:#9FACDD}
+
+/* trust strip */
+.trust{background:#fff;border-bottom:1px solid var(--line);padding:18px 20px}
+.trust-in{max-width:1080px;margin:0 auto;display:flex;gap:8px 36px;flex-wrap:wrap;justify-content:center}
+.trust-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mut);font-weight:600}
+
+/* sections */
+section{padding:56px 0}
+.sec-title{font-size:27px;font-weight:800;text-align:center;letter-spacing:-.3px}
+.sec-sub{text-align:center;color:var(--mut);max-width:600px;margin:10px auto 42px;font-size:15px}
+
+/* purpose cards */
+.purpose-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+.purpose{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow)}
+.purpose .pico{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:20px}
+.purpose h3{font-size:15.5px;font-weight:700;margin-bottom:6px}
+.purpose p{font-size:13px;color:var(--mut)}
+
+/* what we are / not */
+.wwa{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:900px;margin:0 auto}
+@media(max-width:680px){.wwa{grid-template-columns:1fr}}
+.wwa-card{border-radius:var(--r);padding:24px}
+.wwa-card.is{background:#F0FBF7;border:1px solid #BCE7D8}
+.wwa-card.isnot{background:#FFF7F7;border:1px solid #F4CFCF}
+.wwa-card h3{font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.wwa-card.is h3{color:#0B6B4F}.wwa-card.isnot h3{color:#B42318}
+.wwa-card li{list-style:none;font-size:13.5px;margin-bottom:9px;display:flex;gap:8px;align-items:flex-start;color:#33415C}
+.wwa-card .mk{font-weight:800;flex-shrink:0}
+.wwa-card.is .mk{color:var(--green)}.wwa-card.isnot .mk{color:var(--red)}
+
+/* board */
+.board-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.board-head h2{font-size:24px;font-weight:800}
+.board-head p{font-size:13px;color:var(--mut)}
+.filters-wrap{position:relative;margin-bottom:24px}
+.filters{display:flex;gap:10px;flex-wrap:wrap}
+.filters select,.filters input{width:auto;min-width:150px}
+.filters input{flex:1;min-width:200px}
+.filter-lock{position:absolute;inset:-6px;background:rgba(246,247,251,.75);backdrop-filter:blur(2px);border-radius:10px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:10px;z-index:5}
+.lock-note{background:#FFF8E8;border:1px solid #F2DFAC;border-radius:var(--r-sm);padding:12px 16px;font-size:13px;color:#7A5A12;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+.lcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative}
+.lcard:hover{transform:translateY(-3px);box-shadow:0 4px 12px rgba(20,27,71,.1),0 16px 40px rgba(20,27,71,.1)}
+.lcard .anon{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.anon-ava{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff}
+.anon-name{font-weight:700;font-size:15px}
+.anon-meta{font-size:12px;color:var(--faint)}
+.tagrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tag{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:99px;letter-spacing:.2px}
+.tag-pvt{background:#EDE9FB;color:#5B3FA8}.tag-llp{background:#E7EEFB;color:#1D4FA8}.tag-pf{background:#FBF3E2;color:#8A6510}.tag-prop{background:#E8F4F7;color:#0E6B7A}
+.tag-sector{background:var(--bg);color:var(--mut)}
+.spark{height:54px;margin:4px 0 12px}
+.lmetrics{display:flex;flex-direction:column;border-top:1px solid var(--line);padding-top:6px}
+.lm{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}
+.lm:last-child{border-bottom:none}
+.lm b{font-size:14.5px;font-weight:700}
+.lm span{font-size:11px;color:var(--faint);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+
+/* detail */
+.back-btn{background:none;border:none;color:var(--mut);font-size:13.5px;font-weight:600;padding:0;margin-bottom:18px;display:inline-flex;align-items:center;gap:6px}
+.back-btn:hover{color:var(--navy)}
+.d-grid{display:grid;grid-template-columns:2fr 1fr;gap:20px}
+@media(max-width:860px){.d-grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px;box-shadow:var(--shadow);margin-bottom:20px}
+.panel h3{font-size:15.5px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.kv:last-child{border-bottom:none}
+.kv .k{color:var(--mut)}.kv .v{font-weight:600;text-align:right}
+.fintable{width:100%;border-collapse:collapse;font-size:13px}
+.fintable th{text-align:left;padding:9px 10px;color:var(--mut);font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid var(--line)}
+.fintable td{padding:10px;border-bottom:1px solid var(--line)}
+.fintable tr:nth-child(even) td{background:var(--bg)}
+.blur-box{position:relative;overflow:hidden;border-radius:var(--r-sm)}
+.blur-box .blurred{filter:blur(7px);user-select:none;pointer-events:none}
+.blur-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(246,247,251,.55);text-align:center;padding:20px}
+.blur-overlay b{font-size:14.5px}.blur-overlay p{font-size:12.5px;color:var(--mut);max-width:300px}
+.video-shell{background:var(--navy-deep);border-radius:var(--r-sm);aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:10px;text-align:center;padding:20px}
+.play-circle{width:58px;height:58px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.liab-row{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:8px;font-size:13px}
+.dl-counter{background:linear-gradient(135deg,#FFF8E8,#FDF1D3);border:1px solid #F2DFAC;border-radius:var(--r-sm);padding:14px 16px;font-size:13px;margin-bottom:14px}
+.dl-counter b{font-size:19px;color:var(--navy)}
+.dl-dots{display:flex;gap:5px;margin-top:7px}
+.dl-dot{width:22px;height:7px;border-radius:99px;background:#E7D9A8}
+.dl-dot.used{background:var(--navy)}
+.report-link{font-size:12px;color:var(--mut);text-decoration:underline;cursor:pointer;background:none;border:none}
+.report-link:hover{color:var(--red)}
+
+/* research-use banner on every company page */
+.research-banner{background:#EEF2FB;border:1px solid #CBD7F2;border-radius:var(--r-sm);padding:12px 16px;font-size:12px;color:#3A4A73;line-height:1.6;margin-bottom:18px}
+
+/* forms */
+.form-shell{max-width:760px;margin:0 auto}
+.steps-bar{display:flex;margin-bottom:30px;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:#fff}
+.step-tab{flex:1;text-align:center;padding:13px 6px;font-size:11px;font-weight:700;color:var(--faint);background:#fff;border-right:1px solid var(--line)}
+.step-tab:last-child{border-right:none}
+.step-tab.act{color:#fff;background:var(--navy)}
+.step-tab.done{color:var(--teal)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.fgrid{grid-template-columns:1fr}}
+.fgrid .full{grid-column:1/-1}
+.fhint{font-size:11.5px;color:var(--faint);margin-top:4px}
+.month-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:6px}
+.mg-cell label{font-size:10.5px;margin-bottom:3px}
+.mg-cell input{padding:8px 10px;font-size:13px}
+.upload-zone{border:2px dashed var(--line);border-radius:var(--r);padding:24px;text-align:center;background:var(--bg);cursor:pointer}
+.upload-zone:hover{border-color:var(--navy)}
+.upload-zone.has-file{border-color:var(--teal);background:#F0FBF7}
+.upload-zone b{font-size:14px;display:block;margin-bottom:4px}
+.upload-zone span{font-size:12px;color:var(--mut)}
+.file-chip{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-size:12.5px;font-weight:600;margin-top:10px}
+.radio-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.radio-card{border:2px solid var(--line);border-radius:var(--r-sm);padding:16px;cursor:pointer;text-align:center}
+.radio-card:hover{border-color:var(--navy-2)}
+.radio-card.sel{border-color:var(--navy);background:#F2F4FC}
+.radio-card b{display:block;font-size:14px;margin-bottom:3px}
+.radio-card span{font-size:11.5px;color:var(--mut)}
+.liab-add-row{display:grid;grid-template-columns:2fr 1.2fr 1fr auto;gap:10px;align-items:end;margin-bottom:10px}
+@media(max-width:640px){.liab-add-row{grid-template-columns:1fr 1fr}}
+.fee-box{background:linear-gradient(135deg,var(--navy),var(--navy-2));color:#fff;border-radius:var(--r);padding:22px;margin-bottom:20px}
+.fee-line{display:flex;justify-content:space-between;font-size:13.5px;padding:6px 0;color:#C8D1F0}
+.fee-line.total{border-top:1px solid rgba(255,255,255,.2);margin-top:8px;padding-top:12px;color:#fff;font-weight:700;font-size:16px}
+.declaration{background:#FFF7F7;border:1px solid #F4CFCF;border-radius:var(--r-sm);padding:16px;margin:14px 0}
+.declaration label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;color:#5A3636;font-weight:500}
+.declaration input{width:auto;margin-top:3px}
+.declaration .dh{font-weight:700;color:#B42318;font-size:13px;margin-bottom:10px}
+
+/* pricing */
+.price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:760px;margin:0 auto}
+.price-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:30px;box-shadow:var(--shadow);position:relative}
+.price-card.feat{border:2px solid var(--navy)}
+.pop-badge{position:absolute;top:-12px;left:26px;background:var(--navy);color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:99px}
+.price-card .amt{font-size:32px;font-weight:800;margin:10px 0 2px}
+.price-card .amt small{font-size:14px;font-weight:500;color:var(--mut)}
+.pfeat{display:flex;gap:9px;font-size:13.5px;color:var(--mut);margin-bottom:10px;align-items:flex-start}
+.pfeat .ck{color:var(--green);font-weight:800;margin-top:1px}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(16,21,52,.55);backdrop-filter:blur(3px);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:50px 16px;overflow-y:auto}
+.modal{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:28px;box-shadow:0 24px 80px rgba(0,0,0,.3)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-head h3{font-size:17px;font-weight:700}
+.x-btn{background:none;border:none;font-size:22px;color:var(--faint);line-height:1}
+.consent{background:var(--bg);border-radius:var(--r-sm);padding:13px;margin:16px 0;display:flex;gap:10px;align-items:flex-start}
+.consent input{width:auto;margin-top:3px}
+.consent span{font-size:12px;color:var(--mut);line-height:1.6}
+
+/* toast */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--navy-deep);color:#fff;padding:13px 24px;border-radius:99px;font-size:13.5px;font-weight:600;z-index:300;box-shadow:0 8px 30px rgba(0,0,0,.3);display:flex;gap:9px;align-items:center}
+
+/* footer */
+footer{background:var(--navy-deep);color:#9FACDD;padding:44px 20px 30px;margin-top:40px}
+.foot-in{max-width:1080px;margin:0 auto}
+.foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:32px;margin-bottom:28px}
+@media(max-width:700px){.foot-grid{grid-template-columns:1fr}}
+.foot-grid h4{color:#fff;font-size:13.5px;margin-bottom:12px}
+.foot-grid a{display:block;color:#9FACDD;text-decoration:none;font-size:13px;margin-bottom:8px}
+.foot-grid a:hover{color:var(--gold)}
+.foot-legal{border-top:1px solid rgba(255,255,255,.12);padding-top:20px;font-size:11.5px;line-height:1.7;color:#7783B8}
+.disclaimer-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-sm);padding:16px;font-size:11.5px;line-height:1.7;margin-bottom:20px}
+@media(max-width:640px){.nav-links .hide-m{display:none}section{padding:42px 0}}
+</style>
+</head>
+<body>
+
+<!-- ════════ NAV ════════ -->
+<nav>
+  <div class="nav-in">
+    <div class="logo" onclick="go('home')">
+      <div class="logo-mark">D<b>o</b>B</div>
+      <div class="logo-text">DataOfBusiness<small>CORPORATE INTELLIGENCE PLATFORM</small></div>
+    </div>
+    <div class="nav-links">
+      <button class="btn btn-ghost hide-m" onclick="go('board')">Company Database</button>
+      <button class="btn btn-ghost hide-m" onclick="go('list')">List Your Company</button>
+      <span id="navMember" class="member-pill hidden">✓ Research Member</span>
+      <button id="navJoin" class="btn btn-navy" onclick="openMembership()">Get Research Access</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════ HOME ════════ -->
+<div id="page-home">
+  <div class="hero">
+    <div class="hero-in">
+      <div class="hero-badge"><span class="dot"></span> India's private company intelligence platform</div>
+      <h1>Verified company financials,<br>for <em>research &amp; due diligence.</em></h1>
+      <p class="sub">DataOfBusiness is a corporate research database. Indian companies publish CA-certified financial information and business profiles. Research members access verified data for supplier diligence, partnership evaluation, competitor research and corporate intelligence.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-gold btn-lg" onclick="go('board')">Explore Company Database →</button>
+        <button class="btn btn-lg" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25)" onclick="go('list')">List Your Company</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><b id="statListings">0</b><span>Companies listed</span></div>
+        <div class="hstat"><b>36</b><span>Months of financial data</span></div>
+        <div class="hstat"><b>100%</b><span>CA-certified</span></div>
+        <div class="hstat"><b>DPDP</b><span>Compliant &amp; confidential</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trust">
+    <div class="trust-in">
+      <div class="trust-item">✓ ICAI-verified CA certification</div>
+      <div class="trust-item">✓ Research &amp; due-diligence use only</div>
+      <div class="trust-item">✓ No securities · No transactions</div>
+      <div class="trust-item">✓ Every access audit-logged</div>
+    </div>
+  </div>
+
+  <!-- WHAT THIS PLATFORM IS / IS NOT -->
+  <section style="background:#fff;border-bottom:1px solid var(--line)">
+    <div class="wrap">
+      <h2 class="sec-title">A research database — nothing more</h2>
+      <p class="sec-sub">DataOfBusiness exists to provide verified business information. We are deliberately clear about what we are, and what we are not.</p>
+      <div class="wwa">
+        <div class="wwa-card is">
+          <h3>✓ What DataOfBusiness IS</h3>
+          <ul>
+            <li><span class="mk">✓</span> A corporate intelligence &amp; research database</li>
+            <li><span class="mk">✓</span> A source of CA-certified company financials</li>
+            <li><span class="mk">✓</span> A business-information service for diligence</li>
+            <li><span class="mk">✓</span> A directory of verified company profiles &amp; contacts</li>
+            <li><span class="mk">✓</span> A subscription information product</li>
+          </ul>
+        </div>
+        <div class="wwa-card isnot">
+          <h3>✕ What DataOfBusiness is NOT</h3>
+          <ul>
+            <li><span class="mk">✕</span> NOT a stock exchange or securities marketplace</li>
+            <li><span class="mk">✕</span> NOT a broker, investment adviser or research analyst</li>
+            <li><span class="mk">✕</span> NOT a fundraising or capital-raising platform</li>
+            <li><span class="mk">✕</span> We do NOT offer, price, or facilitate any securities</li>
+            <li><span class="mk">✕</span> We do NOT solicit investment or arrange any transaction</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PURPOSES -->
+  <section>
+    <div class="wrap">
+      <h2 class="sec-title">What members use it for</h2>
+      <p class="sec-sub">Verified financial data supports many corporate research and due-diligence needs.</p>
+      <div class="purpose-grid">
+        <div class="purpose"><div class="pico" style="background:#E8F7F1">🔍</div><h3>Supplier &amp; vendor diligence</h3><p>Verify the financial health and track record of a supplier or vendor before contracting.</p></div>
+        <div class="purpose"><div class="pico" style="background:#E7EEFB">🤝</div><h3>Partnership evaluation</h3><p>Assess a potential business partner's financials and stability before committing.</p></div>
+        <div class="purpose"><div class="pico" style="background:#FBF3E2">📊</div><h3>Competitor &amp; market research</h3><p>Benchmark performance and study industry peers using verified data.</p></div>
+        <div class="purpose"><div class="pico" style="background:#EDE9FB">🎯</div><h3>Customer &amp; lead qualification</h3><p>Qualify prospective B2B customers by verified turnover and creditworthiness.</p></div>
+        <div class="purpose"><div class="pico" style="background:#E8F4F7">🏢</div><h3>Acquisition &amp; M&amp;A research</h3><p>Identify and study acquisition or merger targets through reliable financials.</p></div>
+        <div class="purpose"><div class="pico" style="background:#F0FBF7">📈</div><h3>General corporate intelligence</h3><p>Build a verified view of a company before any business engagement.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+    <div class="wrap">
+      <h2 class="sec-title">How it works</h2>
+      <p class="sec-sub">Companies publish verified data. Research members access it on subscription.</p>
+      <div class="wwa" style="max-width:900px">
+        <div class="panel" style="margin:0">
+          <h3 style="color:var(--teal)">🏢 For Companies</h3>
+          <div style="font-size:13.5px;color:var(--mut);line-height:2">
+            1. Register with company PAN + mobile OTP<br>
+            2. Publish CA-certified financials &amp; 36-month turnover<br>
+            3. Add company profile, directors &amp; contact details<br>
+            4. Optionally add a corporate profile video<br>
+            5. Sign the no-securities declaration<br>
+            6. Go live after verification — for research visibility
+          </div>
+        </div>
+        <div class="panel" style="margin:0">
+          <h3 style="color:var(--blue)">🔎 For Research Members</h3>
+          <div style="font-size:13.5px;color:var(--mut);line-height:2">
+            1. Register with PAN + mobile OTP<br>
+            2. Accept the research-use declaration<br>
+            3. Subscribe for research access<br>
+            4. Browse &amp; filter the verified company database<br>
+            5. View full financials, profile &amp; contact details<br>
+            6. Download up to 5 company research profiles
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- onlinecacertificate cross-sell -->
+  <section style="padding:36px 20px">
+    <div class="wrap">
+      <div style="background:linear-gradient(135deg,#1E2761,#2A3580);border-radius:var(--r);padding:26px 28px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;color:#fff">
+        <div style="width:50px;height:50px;background:rgba(232,184,75,.18);border:1px solid rgba(232,184,75,.4);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="color:var(--gold);font-weight:800;font-size:21px">✓</span></div>
+        <div style="flex:1;min-width:240px">
+          <b style="font-size:16px">Don't have a CA to certify your financials?</b>
+          <p style="font-size:13px;color:#C8D1F0;margin-top:4px;line-height:1.6">Get your turnover and financial statements certified online through our partner platform — UDIN-verified by practising Chartered Accountants, in 24–48 hours.</p>
+        </div>
+        <a href="https://onlinecacertificate.in" target="_blank" rel="noopener" class="btn btn-gold" style="text-decoration:none;white-space:nowrap">OnlineCACertificate.in →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section style="background:#fff;border-top:1px solid var(--line)">
+    <div class="wrap">
+      <h2 class="sec-title">Subscription pricing</h2>
+      <p class="sec-sub">A flat information-access subscription. No commissions, no success fees — we are paid for data access only, never for any transaction.</p>
+      <div class="price-grid">
+        <div class="price-card">
+          <h3 style="font-size:15px;font-weight:700">Company Listing</h3>
+          <div class="amt">₹500 <small>/ year of data</small></div>
+          <p style="font-size:12.5px;color:var(--mut);margin-bottom:18px">Publish your verified financials for research visibility. + GST.</p>
+          <div class="pfeat"><span class="ck">✓</span> CA-certified financials hosted</div>
+          <div class="pfeat"><span class="ck">✓</span> 36-month turnover showcase</div>
+          <div class="pfeat"><span class="ck">✓</span> Company profile &amp; corporate video</div>
+          <div class="pfeat"><span class="ck">✓</span> Visible to verified research members</div>
+          <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:14px" onclick="go('list')">List Your Company</button>
+        </div>
+        <div class="price-card feat">
+          <div class="pop-badge">FOR RESEARCH MEMBERS</div>
+          <h3 style="font-size:15px;font-weight:700;margin-top:8px">Research Access</h3>
+          <div class="amt">₹2,500 <small>/ 3 months</small></div>
+          <p style="font-size:12.5px;color:var(--mut);margin-bottom:18px">Full database access for 90 days. + 18% GST = ₹2,950.</p>
+          <div class="pfeat"><span class="ck">✓</span> Full company names &amp; identity</div>
+          <div class="pfeat"><span class="ck">✓</span> CA-certified financial statements</div>
+          <div class="pfeat"><span class="ck">✓</span> Company profile videos &amp; contacts</div>
+          <div class="pfeat"><span class="ck">✓</span> <b>Download 5 research profiles</b></div>
+          <button class="btn btn-navy" style="width:100%;justify-content:center;margin-top:14px" onclick="openMembership()">Get Research Access</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════ COMPANY DATABASE (board) ════════ -->
+<div id="page-board" class="hidden">
+  <section style="padding-top:36px">
+    <div class="wrap">
+      <div class="board-head">
+        <div>
+          <h2>Company Database</h2>
+          <p>Verified company financials for research &amp; due diligence — full details unlock with research access</p>
+        </div>
+        <div id="dlBadge" class="hidden member-pill">⬇ <span id="dlLeft">5</span> profile downloads left</div>
+      </div>
+
+      <div id="boardLock" class="lock-note">
+        <span>🔒 You're viewing limited data. Become a research member to unlock full company names, financial statements, profile videos &amp; contact details.</span>
+        <button class="btn btn-navy" style="padding:7px 16px;font-size:12.5px" onclick="openMembership()">Get Access — ₹2,500</button>
+      </div>
+
+      <div class="filters-wrap">
+        <div class="filters" id="filterBar">
+          <input id="fSearch" placeholder="Search sector, state, company code…" oninput="renderBoard()">
+          <select id="fSector" onchange="renderBoard()"><option value="">All categories</option></select>
+          <select id="fType" onchange="renderBoard()">
+            <option value="">All entity types</option><option>Private Limited Company</option><option>LLP</option><option>Partnership Firm</option><option>Proprietorship</option><option>One Person Company (OPC)</option><option>Public Limited (Unlisted)</option>
+          </select>
+          <select id="fState" onchange="renderBoard()"><option value="">All states</option></select>
+          <select id="fSize" onchange="renderBoard()">
+            <option value="">All sizes (TTM)</option><option value="0-200">Under ₹2 Cr</option><option value="200-500">₹2–5 Cr</option><option value="500-1000">₹5–10 Cr</option><option value="1000+">Above ₹10 Cr</option>
+          </select>
+        </div>
+        <div id="filterLock" class="filter-lock hidden">
+          <span style="font-size:13px;font-weight:700;color:var(--ink)">🔒 Category &amp; advanced filters are a member feature</span>
+          <button class="btn btn-navy" style="padding:7px 16px;font-size:12.5px" onclick="openMembership()">Unlock Filters — ₹2,500</button>
+        </div>
+      </div>
+
+      <div id="boardCards" class="cards"></div>
+      <p id="noResults" class="hidden" style="text-align:center;color:var(--mut);padding:40px 0">No companies match your filters.</p>
+    </div>
+  </section>
+</div>
+
+<!-- ════════ DETAIL ════════ -->
+<div id="page-detail" class="hidden">
+  <section style="padding-top:30px">
+    <div class="wrap">
+      <button class="back-btn" onclick="go('board')">← Back to Company Database</button>
+      <div id="detailContent"></div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════ LIST YOUR COMPANY ════════ -->
+<div id="page-list" class="hidden">
+  <section style="padding-top:36px">
+    <div class="wrap form-shell">
+      <h2 style="font-size:26px;font-weight:800;text-align:center">List Your Company</h2>
+      <p style="text-align:center;color:var(--mut);font-size:14px;margin:8px 0 20px">Publish your verified financials for research visibility. Your data appears under a company code until a research member unlocks it.</p>
+
+      <div class="research-banner" style="max-width:760px;margin:0 auto 24px">
+        <b>Please note:</b> DataOfBusiness is a corporate research &amp; information platform. By listing, you are publishing business information for research and due-diligence visibility only. You are <b>not</b> offering securities, raising capital, making any public offer or private placement, or soliciting any investment or loan through this platform. The platform facilitates no transactions of any kind.
+      </div>
+
+      <div class="steps-bar">
+        <div class="step-tab act" id="st0">1 · PROFILE</div>
+        <div class="step-tab" id="st1">2 · TURNOVER</div>
+        <div class="step-tab" id="st2">3 · FINANCIALS</div>
+        <div class="step-tab" id="st3">4 · LIABILITIES</div>
+        <div class="step-tab" id="st4">5 · VIDEO</div>
+        <div class="step-tab" id="st5">6 · REVIEW</div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div class="panel" id="fs0">
+        <h3>Company / Firm Profile</h3>
+        <div class="fgrid">
+          <div><label class="req">Company / firm name</label><input id="bizName" placeholder="e.g. Nexora Software Pvt Ltd"></div>
+          <div><label class="req">Entity type</label><select id="bizType"><option>Private Limited Company</option><option>LLP</option><option>Partnership Firm</option><option>Proprietorship</option><option>One Person Company (OPC)</option><option>Public Limited (Unlisted)</option></select></div>
+          <div><label class="req">Company PAN (login identity)</label><input id="bizPAN" maxlength="10" placeholder="ABCCD1234E" style="text-transform:uppercase"><div class="fhint">Used only as identity. We never ask for any government-portal login.</div></div>
+          <div><label class="req">CIN / Registration number</label><input id="bizReg" placeholder="U12345DL2019PTC345678"></div>
+          <div><label class="req">Year established</label><input id="bizYear" type="number" placeholder="2019" min="1950" max="2026"></div>
+          <div><label class="req">State</label><select id="bizState"></select></div>
+          <div><label class="req">City</label><input id="bizCity" placeholder="e.g. Bengaluru"></div>
+          <div><label class="req">Sector / category</label><select id="bizSector"></select></div>
+          <div><label>Employee count</label><select id="bizEmp"><option>1–10</option><option>11–25</option><option>26–50</option><option>51–100</option><option>100+</option></select></div>
+          <div><label class="req">Mobile (OTP login)</label><input id="bizMobile" maxlength="10" placeholder="10-digit mobile"></div>
+          <div class="full"><label class="req">Company description (for research members)</label><textarea id="bizDesc" rows="3" placeholder="What the company does, key activities, certifications, markets served…"></textarea></div>
+          <div><label class="req">Contact email (members only)</label><input id="bizEmail" type="email" placeholder="info@company.com"></div>
+          <div><label class="req">Contact phone (members only)</label><input id="bizPhone" placeholder="+91 ..."></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:22px"><button class="btn btn-navy" onclick="nextStep(1)">Continue →</button></div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="panel hidden" id="fs1">
+        <h3>Monthly Turnover — Last 36 Months (₹ Lakhs, excl. GST)</h3>
+        <p style="font-size:12.5px;color:var(--mut);margin-bottom:14px">Enter net monthly turnover. This drives the trend chart shown to research members.</p>
+        <div style="display:flex;gap:10px;align-items:end;margin-bottom:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:160px"><label>Quick-fill all months (₹ L)</label><input id="qfAmt" type="number" placeholder="e.g. 24"></div>
+          <button class="btn btn-ghost" onclick="quickFill()">Apply to all 36</button>
+        </div>
+        <div class="month-grid" id="monthGrid"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:22px">
+          <button class="btn btn-ghost" onclick="nextStep(0)">← Back</button>
+          <button class="btn btn-navy" onclick="nextStep(2)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="panel hidden" id="fs2">
+        <h3>CA-Certified Financial Statements</h3>
+        <label class="req" style="margin-bottom:10px">Who will certify your financials?</label>
+        <div class="radio-cards" style="margin-bottom:18px" id="caModeCards">
+          <div class="radio-card sel" data-mode="own" onclick="pickCAMode(this)"><b>I have my own CA</b><span>Enter your CA's details</span></div>
+          <div class="radio-card" data-mode="online" onclick="pickCAMode(this)"><b>I need a CA certificate</b><span>Get certified online</span></div>
+        </div>
+        <div id="ownCABox">
+          <div class="fgrid">
+            <div><label class="req">Certifying CA name</label><input id="caName" placeholder="CA Full Name"></div>
+            <div><label class="req">CA's ICAI membership no.</label><input id="caNum" placeholder="6-digit"><div class="fhint">Verified before going live</div></div>
+            <div class="full"><label>UDIN (if available)</label><input id="caUdin" placeholder="18-character UDIN"></div>
+          </div>
+        </div>
+        <div id="onlineCABox" class="hidden">
+          <div style="background:linear-gradient(135deg,#F2F4FC,#E8EDFA);border:1.5px solid var(--navy);border-radius:var(--r);padding:20px;margin-bottom:12px">
+            <b style="font-size:15px">Get certified at OnlineCACertificate.in</b>
+            <p style="font-size:13px;color:var(--mut);margin:6px 0 12px;line-height:1.6">UDIN-verified CA certificates for turnover and financial statements, fully online in 24–48 hours.</p>
+            <a href="https://onlinecacertificate.in" target="_blank" rel="noopener" class="btn btn-navy" style="text-decoration:none">Get Certificate →</a>
+          </div>
+        </div>
+        <p style="font-size:12.5px;color:var(--mut);margin:16px 0 10px">Upload Balance Sheet + P&amp;L (PDF, max 10 MB each) for each year:</p>
+        <div id="finUploads"></div>
+        <div class="fgrid" style="margin-top:14px">
+          <div><label class="req">Latest FY net profit (₹ L)</label><input id="finNP" type="number" placeholder="62"></div>
+          <div><label class="req">Net worth (₹ L)</label><input id="finNW" type="number" placeholder="145"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:22px">
+          <button class="btn btn-ghost" onclick="nextStep(1)">← Back</button>
+          <button class="btn btn-navy" onclick="nextStep(3)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="panel hidden" id="fs3">
+        <h3>Loans &amp; Liabilities (for research transparency)</h3>
+        <p style="font-size:12.5px;color:var(--mut);margin-bottom:16px">Declaring existing liabilities gives research members a complete and transparent financial picture.</p>
+        <div id="liabList"></div>
+        <div class="liab-add-row">
+          <div><label>Liability type</label><select id="liabType"><option>Bank Term Loan</option><option>Cash Credit / OD</option><option>Unsecured Loan</option><option>Vehicle / Equipment Loan</option><option>Other Liability</option></select></div>
+          <div><label>Lender / party</label><input id="liabLender" placeholder="e.g. HDFC Bank"></div>
+          <div><label>Outstanding (₹ L)</label><input id="liabAmt" type="number" placeholder="25"></div>
+          <button class="btn btn-ghost" onclick="addLiab()" style="height:41px">+ Add</button>
+        </div>
+        <label style="display:flex;gap:10px;align-items:center;margin-top:14px;cursor:pointer">
+          <input type="checkbox" id="noLiab" style="width:auto" onchange="toggleNoLiab()">
+          <span style="font-size:13px;font-weight:600;color:var(--mut)">No outstanding loans or liabilities</span>
+        </label>
+        <div style="display:flex;justify-content:space-between;margin-top:22px">
+          <button class="btn btn-ghost" onclick="nextStep(2)">← Back</button>
+          <button class="btn btn-navy" onclick="nextStep(4)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="panel hidden" id="fs4">
+        <h3>Corporate Profile Video <span style="font-size:12px;font-weight:600;color:var(--mut)">(optional)</span></h3>
+        <p style="font-size:12.5px;color:var(--mut);margin-bottom:12px">A short company introduction video for research members — what your company does, its strengths and track record. This is a <b>corporate profile video, not an investment pitch</b>.</p>
+        <div class="upload-zone" id="videoZone" onclick="document.getElementById('videoFile').click()">
+          <b>📹 Upload corporate profile video</b>
+          <span>MP4 / MOV / WebM · Max 100 MB · 60 seconds recommended</span>
+          <input type="file" id="videoFile" accept="video/*" class="hidden" onchange="fileChosen(this,'videoZone')">
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:22px">
+          <button class="btn btn-ghost" onclick="nextStep(3)">← Back</button>
+          <button class="btn btn-navy" onclick="nextStep(5)">Review →</button>
+        </div>
+      </div>
+
+      <!-- STEP 6 -->
+      <div class="panel hidden" id="fs5">
+        <h3>Review &amp; Submit</h3>
+        <div id="reviewBox"></div>
+        <div class="fee-box" id="feeBox"></div>
+
+        <div class="declaration">
+          <div class="dh">Mandatory declaration before listing</div>
+          <label style="margin-bottom:10px"><input type="checkbox" id="dec1"><span>I confirm that the information and financial statements provided are true, accurate, and genuinely certified by the named Chartered Accountant.</span></label>
+          <label style="margin-bottom:10px"><input type="checkbox" id="dec2"><span>I confirm that we are <b>NOT</b> using this platform to offer securities, make a public offer or private placement, raise capital, or solicit any investment or loan. The information is published for research and corporate-visibility purposes only.</span></label>
+          <label><input type="checkbox" id="dec3"><span>I understand the platform is an information service that facilitates no transactions, and that the company is solely responsible for the data it uploads.</span></label>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;margin-top:8px;flex-wrap:wrap;gap:10px">
+          <button class="btn btn-ghost" onclick="nextStep(4)">← Back</button>
+          <button class="btn btn-gold btn-lg" onclick="submitListing()">Pay &amp; Publish Listing →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="modalShell" class="hidden"></div>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+  <div class="foot-in">
+    <div class="foot-grid">
+      <div>
+        <div class="logo" style="margin-bottom:14px"><div class="logo-mark">D<b>o</b>B</div><div class="logo-text" style="color:#fff">DataOfBusiness</div></div>
+        <p style="font-size:12.5px;line-height:1.7;max-width:340px">India's private company intelligence platform. CA-certified financial information published for research, diligence and corporate-visibility purposes.</p>
+      </div>
+      <div>
+        <h4>Platform</h4>
+        <a href="#" onclick="go('board');return false">Company Database</a>
+        <a href="#" onclick="go('list');return false">List Your Company</a>
+        <a href="#" onclick="openMembership();return false">Research Access</a>
+        <a href="https://onlinecacertificate.in" target="_blank" rel="noopener">Get CA Certificate ↗</a>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <a href="terms.html">Terms of Service</a>
+        <a href="privacy.html">Privacy Policy (DPDP 2023)</a>
+        <a href="refund.html">Refund Policy</a>
+        <a href="grievance.html">Grievance &amp; Contact</a>
+      </div>
+    </div>
+    <div class="disclaimer-box">
+      <b style="color:#C8D1F0">IMPORTANT DISCLAIMER:</b> DataOfBusiness is a corporate information and research platform only. We are NOT a stock exchange, broker, depository, investment adviser, research analyst, portfolio manager, peer-to-peer lending platform, or any intermediary regulated under the SEBI Act 1992, the Securities Contracts (Regulation) Act 1956, or the RBI's NBFC-P2P Directions. We do NOT offer, price, recommend, or facilitate any securities; we do NOT raise capital, solicit investment, accept deposits, or arrange loans; and we do NOT broker, match, negotiate, or participate in any transaction. All financial information is supplied by listed companies and certified by their respective Chartered Accountants. Members must conduct their own independent due diligence. Any dealing a member may pursue with a company happens entirely off this platform, privately, between identified parties, at their own risk. Access is restricted to Indian residents.
+    </div>
+    <div class="foot-legal">© 2026 DataOfBusiness · dataofbusiness.in · A corporate research &amp; information service · All subscription fees include applicable GST · Made in India · <a href="#" style="color:#7783B8" onclick="if(confirm('Reset demo? Clears membership and downloads in this browser.')){try{localStorage.removeItem('dob_a')}catch(e){};location.reload()}return false">Reset demo</a></div>
+  </div>
+</footer>
+
+<script>
+/* ════════ STATE ════════ */
+var DB={member:false,downloads:[],reported:[],myListings:[]};
+function saveDB(){try{localStorage.setItem('dob_a',JSON.stringify(DB))}catch(e){}}
+function loadDB(){try{var d=localStorage.getItem('dob_a');if(d)DB=Object.assign(DB,JSON.parse(d))}catch(e){}}
+loadDB();
+
+/* ════════ SEED DATA ════════ */
+function genT(base,growth,noise){var a=[],v=base;for(var i=0;i<36;i++){a.push(Math.max(1,Math.round(v+(Math.random()*2-1)*noise)));v=v*(1+growth)}return a}
+var SECTORS=["Textiles","Pharma","Construction","Agriculture","Trading","Logistics","Food Processing","Auto Components","Packaging","IT Services","Chemicals","Healthcare"];
+var STATES=["Gujarat","Maharashtra","Delhi","Punjab","Tamil Nadu","Karnataka","Madhya Pradesh","Rajasthan","Uttar Pradesh","Haryana","Telangana","West Bengal","Andhra Pradesh","Bihar","Kerala","Other"];
+
+var LISTINGS=[
+ {id:"DOB-1042",name:"Sunrise Textile LLP",type:"LLP",sector:"Textiles",state:"Gujarat",city:"Surat",est:2018,emp:"26–50",desc:"Export-quality polyester blend manufacturer. ISO 9001 unit, B2B clients across 8 states, 40% revenue from repeat orders.",email:"info@sunrisetextile.com",phone:"+91 99876 54321",ca:"CA Rajesh Mehta",caNum:"123456",reg:"AAB-1234",np:38,nw:110,turnover:genT(28,0.012,4),liab:[{t:"Bank Term Loan",l:"SBI",a:42}],video:true},
+ {id:"DOB-1043",name:"Himalaya Agro Partnership",type:"Partnership Firm",sector:"Agriculture",state:"Punjab",city:"Ludhiana",est:2015,emp:"11–25",desc:"Wholesale agri-commodity trader in wheat, rice and pulses. Procurement from 200+ farmers. APMC licensed.",email:"himalayaagro@gmail.com",phone:"+91 98765 43210",ca:"CA Gurpreet Singh",caNum:"234567",reg:"FRM-2291",np:21,nw:68,turnover:genT(20,0.008,5),liab:[{t:"Cash Credit / OD",l:"PNB",a:30}],video:true},
+ {id:"DOB-1044",name:"Metro Infrastructure LLP",type:"LLP",sector:"Construction",state:"Delhi",city:"New Delhi",est:2016,emp:"51–100",desc:"Civil contractor for commercial interiors & institutional buildings. Class A PWD registered.",email:"metroinfra.delhi@gmail.com",phone:"+91 98100 11234",ca:"CA Sunita Sharma",caNum:"345678",reg:"AAC-5567",np:72,nw:240,turnover:genT(58,0.014,12),liab:[{t:"Bank Term Loan",l:"HDFC Bank",a:95}],video:true},
+ {id:"DOB-1045",name:"Coromandel Trading Firm",type:"Partnership Firm",sector:"Trading",state:"Tamil Nadu",city:"Chennai",est:2019,emp:"11–25",desc:"Import-export of industrial chemicals. DGFT registered, active IEC. Clients in paper, textile, pharma.",email:"coromandeltrade@outlook.com",phone:"+91 94440 55678",ca:"CA Venkatesh Iyer",caNum:"456789",reg:"FRM-8842",np:18,nw:52,turnover:genT(22,0.006,4),liab:[],video:true},
+ {id:"DOB-1046",name:"Western Pharma LLP",type:"LLP",sector:"Pharma",state:"Gujarat",city:"Ahmedabad",est:2017,emp:"26–50",desc:"Pharma formulation manufacturer. Valid Drug Licence + FSSAI. Supplies hospital procurement chains.",email:"westernpharma@gmail.com",phone:"+91 99090 34567",ca:"CA Dhruv Patel",caNum:"567890",reg:"AAD-3321",np:58,nw:180,turnover:genT(36,0.013,6),liab:[{t:"Bank Term Loan",l:"ICICI Bank",a:60}],video:true},
+ {id:"DOB-1047",name:"Narmada Logistics LLP",type:"LLP",sector:"Logistics",state:"Madhya Pradesh",city:"Bhopal",est:2020,emp:"11–25",desc:"Last-mile logistics with owned fleet of 18 vehicles. FMCG and e-commerce clients.",email:"narmadalogistics@gmail.com",phone:"+91 97555 67890",ca:"CA Priya Tiwari",caNum:"678901",reg:"AAE-9981",np:14,nw:38,turnover:genT(12,0.018,3),liab:[{t:"Vehicle / Equipment Loan",l:"Cholamandalam",a:48}],video:true},
+ {id:"DOB-1050",name:"Nexora Software Private Limited",type:"Private Limited Company",sector:"IT Services",state:"Karnataka",city:"Bengaluru",est:2019,emp:"26–50",desc:"SaaS development studio with 3 US retainer clients and a proprietary HR-tech product. 85% gross margin on services.",email:"hello@nexorasoft.in",phone:"+91 98860 11223",ca:"CA Aditi Kulkarni",caNum:"901234",reg:"U72900KA2019PTC112233",np:62,nw:145,turnover:genT(24,0.022,4),liab:[],video:true},
+ {id:"DOB-1052",name:"GreenLeaf Wellness (OPC) Pvt Ltd",type:"One Person Company (OPC)",sector:"Healthcare",state:"Maharashtra",city:"Pune",est:2021,emp:"11–25",desc:"D2C ayurvedic wellness brand with AYUSH licence. 70% revenue from own website + marketplaces.",email:"care@greenleafwellness.in",phone:"+91 98220 33445",ca:"CA Neha Joshi",caNum:"223344",reg:"U24230MH2021OPC445566",np:16,nw:42,turnover:genT(9,0.028,2),liab:[{t:"Unsecured Loan",l:"Founder family",a:12}],video:true},
+ {id:"DOB-1053",name:"Bharat Polymers Limited",type:"Public Limited (Unlisted)",sector:"Chemicals",state:"Gujarat",city:"Vadodara",est:2005,emp:"100+",desc:"Unlisted public company manufacturing industrial polymer compounds. 2 plants, 18-year history, exports to 6 countries.",email:"corp@bharatpolymers.com",phone:"+91 99250 44556",ca:"CA Hemant Desai",caNum:"334455",reg:"U25200GJ2005PLC667788",np:140,nw:520,turnover:genT(95,0.006,14),liab:[{t:"Bank Term Loan",l:"SBI Consortium",a:220}],video:true}
+];
+DB.myListings.forEach(function(l){LISTINGS.push(l)});
+
+/* ════════ HELPERS ════════ */
+var AVA=["#1E2761","#0D9488","#7C3AED","#B45309","#BE185D","#1D4FA8","#0F766E","#9333EA"];
+var TYPE_SHORT={"Private Limited Company":"Pvt Ltd","LLP":"LLP","Partnership Firm":"Firm","Proprietorship":"Proprietorship","One Person Company (OPC)":"OPC","Public Limited (Unlisted)":"Public Ltd"};
+function typeShort(t){return TYPE_SHORT[t]||t}
+function typeTag(t){if(t==="LLP")return'tag-llp';if(t==="Partnership Firm")return'tag-pf';if(t.indexOf("Limited")>=0||t.indexOf("OPC")>=0)return'tag-pvt';return'tag-prop'}
+function anonName(l){return l.sector+" "+typeShort(l.type)}
+function fmtL(n){return "₹"+n+" L"}
+function annualT(a){return Math.round(a.slice(-12).reduce(function(x,y){return x+y},0))}
+function growth(a){var f=a.slice(0,12).reduce(function(x,y){return x+y},0),l=a.slice(-12).reduce(function(x,y){return x+y},0);return f>0?Math.round((l-f)/f*100):0}
+function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function sparkSVG(d,w,h,c){var mx=Math.max.apply(null,d),mn=Math.min.apply(null,d),r=mx-mn||1;var p=d.map(function(v,i){return (i/(d.length-1)*w).toFixed(1)+","+(h-((v-mn)/r)*(h-6)-3).toFixed(1)}).join(" ");return '<svg width="100%" height="'+h+'" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none"><polygon points="0,'+h+' '+p+' '+w+','+h+'" fill="'+c+'" opacity="0.12"/><polyline points="'+p+'" fill="none" stroke="'+c+'" stroke-width="2" stroke-linejoin="round"/></svg>'}
+function toast(m){var t=document.createElement('div');t.className='toast';t.innerHTML=m;document.body.appendChild(t);setTimeout(function(){t.remove()},3400)}
+function activeDl(){return DB.downloads.filter(function(id){return DB.reported.indexOf(id)<0}).length}
+
+/* ════════ NAV ════════ */
+var pages=['home','board','detail','list'];
+function go(p){pages.forEach(function(x){document.getElementById('page-'+x).classList.add('hidden')});document.getElementById('page-'+p).classList.remove('hidden');window.scrollTo(0,0);if(p==='board')renderBoard()}
+function refreshNav(){
+  document.getElementById('navMember').classList.toggle('hidden',!DB.member);
+  document.getElementById('navJoin').classList.toggle('hidden',DB.member);
+  document.getElementById('dlBadge').classList.toggle('hidden',!DB.member);
+  var bl=document.getElementById('boardLock');if(bl)bl.classList.toggle('hidden',DB.member);
+  document.getElementById('dlLeft').textContent=Math.max(0,5-activeDl());
+  document.getElementById('statListings').textContent=LISTINGS.length;
+}
+
+/* ════════ FILTERS ════════ */
+function initFilters(){
+  var sec=[],st=[];LISTINGS.forEach(function(l){if(sec.indexOf(l.sector)<0)sec.push(l.sector);if(st.indexOf(l.state)<0)st.push(l.state)});
+  var ss=document.getElementById('fSector');sec.sort().forEach(function(s){var o=document.createElement('option');o.textContent=s;ss.appendChild(o)});
+  var sts=document.getElementById('fState');st.sort().forEach(function(s){var o=document.createElement('option');o.textContent=s;sts.appendChild(o)});
+}
+
+/* ════════ BOARD ════════ */
+function renderBoard(){
+  var lock=document.getElementById('filterLock'),bar=document.getElementById('filterBar');
+  if(lock&&bar){lock.classList.toggle('hidden',DB.member);bar.querySelectorAll('input,select').forEach(function(el){el.disabled=!DB.member})}
+  var q="",fs="",ft="",fst="",fsz="";
+  if(DB.member){q=(document.getElementById('fSearch').value||"").toLowerCase();fs=document.getElementById('fSector').value;ft=document.getElementById('fType').value;fst=document.getElementById('fState').value;fsz=document.getElementById('fSize').value}
+  var box=document.getElementById('boardCards');box.innerHTML="";var shown=0;
+  LISTINGS.forEach(function(l,idx){
+    if(DB.reported.indexOf(l.id)>=0)return;
+    var hay=(l.sector+" "+l.state+" "+l.city+" "+l.id+" "+l.type).toLowerCase();
+    if(q&&hay.indexOf(q)<0)return;
+    if(fs&&l.sector!==fs)return;if(ft&&l.type!==ft)return;if(fst&&l.state!==fst)return;
+    if(fsz){var t=annualT(l.turnover);if(fsz==="0-200"&&t>=200)return;if(fsz==="200-500"&&(t<200||t>=500))return;if(fsz==="500-1000"&&(t<500||t>=1000))return;if(fsz==="1000+"&&t<1000)return}
+    shown++;var color=AVA[idx%AVA.length];
+    var c=document.createElement('div');c.className='lcard';c.onclick=function(){openDetail(l.id)};
+    c.innerHTML='<div class="anon"><div class="anon-ava" style="background:'+color+'">'+l.sector.charAt(0)+'</div>'+
+      '<div><div class="anon-name">'+esc(l.id)+'</div><div class="anon-meta">'+esc(anonName(l))+' · '+esc(l.city)+', '+esc(l.state)+' · Est. '+l.est+'</div></div></div>'+
+      '<div class="tagrow"><span class="tag '+typeTag(l.type)+'">'+typeShort(l.type)+'</span><span class="tag tag-sector">'+esc(l.sector)+'</span></div>'+
+      '<div class="spark">'+sparkSVG(l.turnover,300,54,color)+'</div>'+
+      '<div class="lmetrics">'+
+        '<div class="lm"><span>TTM Turnover</span><b>'+fmtL(annualT(l.turnover))+'</b></div>'+
+        '<div class="lm"><span>3-Yr Growth</span><b style="color:'+(growth(l.turnover)>=0?'var(--green)':'var(--red)')+'">'+(growth(l.turnover)>=0?'+':'')+growth(l.turnover)+'%</b></div>'+
+        '<div class="lm"><span>Net Profit</span><b>'+fmtL(l.np)+'</b></div>'+
+        '<div class="lm"><span>Net Worth</span><b>'+fmtL(l.nw)+'</b></div>'+
+      '</div>';
+    box.appendChild(c);
+  });
+  document.getElementById('noResults').classList.toggle('hidden',shown>0);
+  refreshNav();
+}
+
+/* ════════ DETAIL ════════ */
+function openDetail(id){
+  var l=LISTINGS.find(function(x){return x.id===id});if(!l)return;
+  var m=DB.member,idx=LISTINGS.indexOf(l),color=AVA[idx%AVA.length];
+  var dlUsed=DB.downloads.indexOf(id)>=0 && DB.reported.indexOf(id)<0;
+  var dlLeft=5-activeDl();
+  var liabHTML=l.liab.length?l.liab.map(function(x){return '<div class="liab-row"><span>'+esc(x.t)+' — '+esc(x.l)+'</span><b>'+fmtL(x.a)+'</b></div>'}).join(""):'<div class="liab-row" style="background:#EAF7F0;color:#0B6B4F"><span>✓ No outstanding loans or liabilities declared</span></div>';
+  var totLiab=l.liab.reduce(function(a,b){return a+b.a},0);
+  var now=new Date(),monthsRows="";
+  for(var i=0;i<36;i+=12){var sl=l.turnover.slice(i,i+12);var yl=(now.getFullYear()-3+Math.floor(i/12))+"–"+String(now.getFullYear()-2+Math.floor(i/12)).slice(2);monthsRows+='<tr><td><b>FY '+yl+'</b></td><td>'+fmtL(Math.round(sl.reduce(function(a,b){return a+b},0)))+'</td><td>'+fmtL(Math.round(sl.reduce(function(a,b){return a+b},0)/12))+'</td><td>'+fmtL(Math.max.apply(null,sl))+'</td></tr>'}
+
+  var identity=m
+    ?'<div class="panel"><h3>🏢 Company Identity <span class="member-pill">Member access</span></h3><div class="kv"><span class="k">Legal name</span><span class="v">'+esc(l.name)+'</span></div><div class="kv"><span class="k">CIN / Reg.</span><span class="v">'+esc(l.reg||"On file")+'</span></div><div class="kv"><span class="k">Certifying CA</span><span class="v">'+esc(l.ca)+' (ICAI '+esc(l.caNum)+')</span></div><div class="kv"><span class="k">Email</span><span class="v">'+esc(l.email)+'</span></div><div class="kv"><span class="k">Phone</span><span class="v">'+esc(l.phone)+'</span></div></div>'
+    :'<div class="panel"><h3>🏢 Company Identity</h3><div class="blur-box"><div class="blurred"><div class="kv"><span class="k">Legal name</span><span class="v">██████████ Pvt Ltd</span></div><div class="kv"><span class="k">CIN</span><span class="v">U█████████</span></div><div class="kv"><span class="k">Email</span><span class="v">████@████.com</span></div><div class="kv"><span class="k">Phone</span><span class="v">+91 █████ █████</span></div></div><div class="blur-overlay"><b>🔒 Identity locked</b><p>Get research access to view the company name, CA details and contact information.</p><button class="btn btn-navy" onclick="openMembership()">Unlock — ₹2,500</button></div></div></div>';
+
+  var video=m
+    ?'<div class="panel"><h3>🎬 Corporate Profile Video</h3><div class="video-shell"><div class="play-circle" onclick="toast(\'▶ Video player opens here — corporate profile videos are hosted on the platform\')"><svg width="22" height="22" viewBox="0 0 24 24" fill="#1E2761"><path d="M8 5v14l11-7z"/></svg></div><b style="font-size:14px">'+esc(l.name)+' — Company Profile</b><span style="font-size:12px;color:#9FACDD">Corporate profile · Members only</span></div></div>'
+    :'<div class="panel"><h3>🎬 Corporate Profile Video</h3><div class="video-shell"><div style="font-size:30px">🔒</div><b style="font-size:14px">Profile video locked</b><span style="font-size:12px;color:#9FACDD">Research members can watch the company profile video</span><button class="btn btn-gold" onclick="openMembership()">Get Access</button></div></div>';
+
+  var dlBtn=!m?'<button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="openMembership()">🔒 Download Research Profile (members only)</button>'
+    :dlUsed?'<button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="downloadProfile(\''+l.id+'\')">⬇ Download Again (already counted)</button>'
+    :dlLeft>0?'<button class="btn btn-navy" style="width:100%;justify-content:center" onclick="downloadProfile(\''+l.id+'\')">⬇ Download Research Profile ('+dlLeft+' left)</button>'
+    :'<button class="btn btn-ghost" style="width:100%;justify-content:center" disabled>Download limit reached (5/5)</button>';
+  var dlDots="";for(var d=0;d<5;d++){dlDots+='<div class="dl-dot'+(d<activeDl()?' used':'')+'"></div>'}
+
+  document.getElementById('detailContent').innerHTML=
+    '<div style="display:flex;gap:14px;align-items:center;margin-bottom:20px;flex-wrap:wrap"><div class="anon-ava" style="background:'+color+';width:54px;height:54px;font-size:20px;border-radius:13px">'+l.sector.charAt(0)+'</div><div><div style="font-size:22px;font-weight:800">'+(m?esc(l.name):esc(anonName(l)))+'</div><div style="font-size:13px;color:var(--mut)">'+l.id+' · '+esc(l.city)+', '+esc(l.state)+' · Est. '+l.est+' · '+esc(l.emp)+' employees</div><div class="tagrow" style="margin:8px 0 0"><span class="tag '+typeTag(l.type)+'">'+typeShort(l.type)+'</span><span class="tag tag-sector">'+esc(l.sector)+'</span>'+(m?'<span class="tag" style="background:#E8F7F1;color:#0B6B4F">✓ Identity unlocked</span>':'<span class="tag" style="background:#F1F2F7;color:#5A6478">🔒 Code only</span>')+'</div></div></div>'+
+
+    '<div class="research-banner">📋 This company profile is provided for <b>research, due-diligence and corporate-intelligence purposes only</b>. The information is published by the company and certified by its CA. DataOfBusiness makes no offer of securities, no recommendation, and facilitates no transaction. Any engagement you pursue with this company is private and entirely at your own discretion and risk.</div>'+
+
+    '<div class="d-grid"><div>'+
+      '<div class="panel"><h3>📈 36-Month Turnover Trend (₹ L / month, excl. GST)</h3><div style="height:120px">'+sparkSVG(l.turnover,600,120,color)+'</div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--faint);margin-top:4px"><span>36 months ago</span><span>Latest month</span></div><table class="fintable" style="margin-top:16px"><tr><th>Period</th><th>Annual</th><th>Monthly Avg</th><th>Peak</th></tr>'+monthsRows+'</table></div>'+
+      '<div class="panel"><h3>📋 Company Profile</h3><p style="font-size:13.5px;color:var(--mut);line-height:1.7">'+esc(l.desc)+'</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:16px"><div class="lm" style="background:var(--bg);padding:12px;border-radius:8px"><span>TTM Turnover</span><b>'+fmtL(annualT(l.turnover))+'</b></div><div class="lm" style="background:var(--bg);padding:12px;border-radius:8px"><span>Net Profit</span><b>'+fmtL(l.np)+'</b></div><div class="lm" style="background:var(--bg);padding:12px;border-radius:8px"><span>Net Worth</span><b>'+fmtL(l.nw)+'</b></div><div class="lm" style="background:var(--bg);padding:12px;border-radius:8px"><span>3-Yr Growth</span><b>'+(growth(l.turnover)>=0?'+':'')+growth(l.turnover)+'%</b></div></div></div>'+
+      '<div class="panel"><h3>⚖️ Loans &amp; Liabilities <span style="font-size:12px;font-weight:600;color:var(--mut)">(total: '+fmtL(totLiab)+')</span></h3>'+liabHTML+'<p style="font-size:11.5px;color:var(--faint);margin-top:10px">Declared by the company. Verify independently during due diligence.</p></div>'+
+      (m?'<div class="panel"><h3>📄 CA-Certified Statements <span class="member-pill">Member access</span></h3><div class="liab-row"><span>📄 Balance Sheet — latest 3 FYs</span><b style="color:var(--green)">PDF ✓</b></div><div class="liab-row"><span>📄 Profit &amp; Loss — latest 3 FYs</span><b style="color:var(--green)">PDF ✓</b></div><p style="font-size:11.5px;color:var(--faint);margin-top:8px">Served via time-limited secure links. Included in research-profile download.</p></div>'
+        :'<div class="panel"><h3>📄 CA-Certified Statements</h3><div class="blur-box"><div class="blurred"><div class="liab-row"><span>📄 Balance Sheet FY 2023-24</span><b>PDF</b></div><div class="liab-row"><span>📄 P&amp;L FY 2023-24</span><b>PDF</b></div></div><div class="blur-overlay"><b>🔒 Statements locked</b><p>Members can view and download CA-certified statements.</p></div></div></div>')+
+    '</div><div>'+
+      identity+video+
+      '<div class="panel"><h3>⬇ Research Profile</h3>'+(m?'<div class="dl-counter">You have <b>'+dlLeft+'</b> of 5 downloads remaining<div class="dl-dots">'+dlDots+'</div></div>':'')+dlBtn+'<p style="font-size:11px;color:var(--faint);margin-top:10px">Downloads include identity, 36-month turnover, financials summary and liabilities. Each unique company counts once.</p>'+(m?'<div style="margin-top:12px;text-align:center"><button class="report-link" onclick="reportListing(\''+l.id+'\')">⚐ Report incorrect data in this listing</button></div>':'')+'</div>'+
+    '</div></div>';
+  go('detail');
+}
+
+/* ════════ DOWNLOAD (5 limit, void-on-report refund) ════════ */
+function downloadProfile(id){
+  if(!DB.member){openMembership();return}
+  var already=DB.downloads.indexOf(id)>=0 && DB.reported.indexOf(id)<0;
+  if(!already&&activeDl()>=5){toast('❌ Download limit reached — 5 of 5 used');return}
+  var l=LISTINGS.find(function(x){return x.id===id});
+  if(DB.downloads.indexOf(id)<0)DB.downloads.push(id);saveDB();
+  var now=new Date();
+  var rows=l.turnover.map(function(v,i){var d=new Date(now.getFullYear(),now.getMonth()-35+i,1);return d.toLocaleString('en-IN',{month:'short',year:'2-digit'})+", "+v}).join("\n");
+  var liab=l.liab.length?l.liab.map(function(x){return x.t+" — "+x.l+": ₹"+x.a+" L"}).join("\n"):"None declared";
+  var txt="════════════════════════════════════════\nDATAOFBUSINESS — RESEARCH PROFILE\nFor research & due-diligence purposes only\nDownloaded: "+now.toLocaleString('en-IN')+"\nListing: "+l.id+"\n════════════════════════════════════════\n\nCOMPANY (member access)\nName: "+l.name+"\nType: "+l.type+"\nCIN/Reg: "+(l.reg||"-")+"\nLocation: "+l.city+", "+l.state+"\nEstablished: "+l.est+"\nEmployees: "+l.emp+"\nEmail: "+l.email+"\nPhone: "+l.phone+"\n\nCERTIFICATION\nCA: "+l.ca+" (ICAI "+l.caNum+")\n\nPROFILE\n"+l.desc+"\n\nKEY FINANCIALS\nTTM Turnover: ₹"+annualT(l.turnover)+" L\nNet Profit: ₹"+l.np+" L\nNet Worth: ₹"+l.nw+" L\n3-Yr Growth: "+growth(l.turnover)+"%\n\nLOANS & LIABILITIES\n"+liab+"\n\n36-MONTH TURNOVER (₹ L, excl. GST)\nMonth, Turnover\n"+rows+"\n\n════════════════════════════════════════\nDISCLAIMER: Information supplied by the company and\ncertified by the named CA. Provided for research and\ndue diligence only. DataOfBusiness makes no offer of\nsecurities, no recommendation, and facilitates no\ntransaction. Verify independently. Any dealing is\nprivate, off-platform, at your own risk.\n════════════════════════════════════════";
+  var blob=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=l.id+"_research_profile.txt";a.click();URL.revokeObjectURL(a.href);
+  toast('✓ Profile downloaded — '+(5-activeDl())+' downloads remaining');openDetail(id);
+}
+
+/* ════════ REPORT (refund slot + show replacement) ════════ */
+function reportListing(id){
+  var shell=document.getElementById('modalShell');shell.className='modal-bg';
+  shell.innerHTML='<div class="modal"><div class="modal-head"><h3>Report Incorrect Data</h3><button class="x-btn" onclick="closeModal()">×</button></div>'+
+    '<p style="font-size:13px;color:var(--mut);margin-bottom:14px">If you believe this listing contains incorrect or misleading data, report it. Our team verifies every report. If confirmed incorrect, the listing is removed, and if you had downloaded it, your download slot is refunded so you can view a replacement.</p>'+
+    '<label>Reason</label><select id="repReason" style="margin-bottom:12px"><option value="wrong_turnover">Incorrect turnover figures</option><option value="fake_ca">CA certificate appears fake / invalid</option><option value="wrong_financials">Incorrect financial statements</option><option value="wrong_liabilities">Undisclosed / wrong liabilities</option><option value="other">Other</option></select>'+
+    '<label>Details (optional)</label><textarea id="repDetail" rows="3" placeholder="What appears incorrect…" style="margin-bottom:14px"></textarea>'+
+    '<button class="btn btn-navy" style="width:100%;justify-content:center" onclick="submitReport(\''+id+'\')">Submit Report to Admin</button></div>';
+}
+function submitReport(id){
+  if(DB.reported.indexOf(id)<0)DB.reported.push(id);saveDB();
+  closeModal();
+  toast('✓ Report submitted. Listing removed pending verification; download slot refunded. You may view a replacement.');
+  setTimeout(function(){go('board')},800);
+}
+
+/* ════════ MEMBERSHIP ════════ */
+function openMembership(){
+  if(DB.member){toast('✓ You already have research access');return}
+  var shell=document.getElementById('modalShell');shell.className='modal-bg';
+  shell.innerHTML='<div class="modal"><div class="modal-head"><h3>Research Access</h3><button class="x-btn" onclick="closeModal()">×</button></div>'+
+    '<div style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:16px"><div style="display:flex;justify-content:space-between;font-size:14px;padding:4px 0"><span>Research access — 3 months</span><b>₹2,500</b></div><div style="display:flex;justify-content:space-between;font-size:13px;color:var(--mut);padding:4px 0"><span>GST @ 18%</span><span>₹450</span></div><div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;border-top:1px solid var(--line);margin-top:6px;padding-top:10px"><span>Total</span><span>₹2,950</span></div></div>'+
+    '<div class="pfeat"><span class="ck">✓</span> Full company names &amp; identity</div><div class="pfeat"><span class="ck">✓</span> CA-certified financial statements</div><div class="pfeat"><span class="ck">✓</span> Company profile videos &amp; contacts</div><div class="pfeat"><span class="ck">✓</span> <b>Download 5 research profiles</b></div>'+
+    '<div class="consent"><input type="checkbox" id="memConsent"><span>I confirm I am an Indian resident accessing this platform for <b>research and due-diligence purposes only</b>. I understand DataOfBusiness is an information service — not a stock exchange, broker, or investment adviser — that it does not solicit investment or facilitate any transaction, and that any dealing I pursue with a company is private, off-platform, and at my own risk.</span></div>'+
+    '<button class="btn btn-navy btn-lg" style="width:100%;justify-content:center" id="payBtn" onclick="payMembership()">💳 Pay ₹2,950</button>'+
+    '<p style="font-size:11px;color:var(--faint);text-align:center;margin-top:10px">Demo mode — payment simulated. Production connects to Razorpay.</p></div>';
+}
+function payMembership(){
+  if(!document.getElementById('memConsent').checked){toast('Please accept the research-use declaration first');return}
+  var b=document.getElementById('payBtn');b.disabled=true;b.textContent='Processing payment…';
+  setTimeout(function(){b.textContent='✓ Payment Successful!';b.style.background='var(--green)';setTimeout(function(){DB.member=true;saveDB();closeModal();refreshNav();renderBoard();toast('🎉 Research access active — full data unlocked, 5 downloads available')},1000)},1700);
+}
+function closeModal(){var s=document.getElementById('modalShell');s.className='hidden';s.innerHTML=''}
+
+/* ════════ LISTING FORM ════════ */
+var curStep=0,draft={liab:[]},caMode="own";
+function initForm(){
+  var st=document.getElementById('bizState');STATES.forEach(function(s){var o=document.createElement('option');o.textContent=s;st.appendChild(o)});
+  var sc=document.getElementById('bizSector');SECTORS.concat(["Retail","Education","Hospitality","Real Estate Services","Other"]).sort().forEach(function(s){var o=document.createElement('option');o.textContent=s;sc.appendChild(o)});
+  var mg=document.getElementById('monthGrid'),now=new Date();
+  for(var i=35;i>=0;i--){var d=new Date(now.getFullYear(),now.getMonth()-i,1);var cell=document.createElement('div');cell.className='mg-cell';cell.innerHTML='<label>'+d.toLocaleString('en-IN',{month:'short',year:'2-digit'})+'</label><input type="number" class="mInput" placeholder="₹ L" min="0">';mg.appendChild(cell)}
+  var fu=document.getElementById('finUploads'),fyNow=now.getMonth()>=3?now.getFullYear():now.getFullYear()-1;
+  for(var y=0;y<3;y++){var fy=(fyNow-1-y)+"–"+String(fyNow-y).slice(2);fu.innerHTML+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px"><div class="upload-zone" style="padding:16px" onclick="this.querySelector(\'input\').click()"><b style="font-size:12.5px">📄 Balance Sheet FY '+fy+'</b><span>PDF · max 10 MB</span><input type="file" accept=".pdf" class="hidden" onchange="fileChosen(this,null)"></div><div class="upload-zone" style="padding:16px" onclick="this.querySelector(\'input\').click()"><b style="font-size:12.5px">📄 P&amp;L FY '+fy+'</b><span>PDF · max 10 MB</span><input type="file" accept=".pdf" class="hidden" onchange="fileChosen(this,null)"></div></div>'}
+}
+function quickFill(){var v=document.getElementById('qfAmt').value;if(!v)return;document.querySelectorAll('.mInput').forEach(function(i){i.value=v})}
+function fileChosen(input,zid){var zone=zid?document.getElementById(zid):input.closest('.upload-zone');if(input.files.length){zone.classList.add('has-file');var e=zone.querySelector('.file-chip');if(e)e.remove();var chip=document.createElement('div');chip.className='file-chip';chip.innerHTML='✓ '+esc(input.files[0].name);zone.appendChild(chip)}}
+function pickCAMode(el){document.querySelectorAll('#caModeCards .radio-card').forEach(function(c){c.classList.remove('sel')});el.classList.add('sel');caMode=el.dataset.mode;document.getElementById('ownCABox').classList.toggle('hidden',caMode!=="own");document.getElementById('onlineCABox').classList.toggle('hidden',caMode!=="online")}
+function addLiab(){var t=document.getElementById('liabType').value,le=document.getElementById('liabLender').value.trim(),a=parseFloat(document.getElementById('liabAmt').value);if(!le||!a){toast('Enter lender and amount');return}draft.liab.push({t:t,l:le,a:a});document.getElementById('liabLender').value='';document.getElementById('liabAmt').value='';document.getElementById('noLiab').checked=false;renderLiab()}
+function renderLiab(){var b=document.getElementById('liabList');b.innerHTML='';draft.liab.forEach(function(x,i){var r=document.createElement('div');r.className='liab-row';r.innerHTML='<span>'+esc(x.t)+' — '+esc(x.l)+'</span><span><b>'+fmtL(x.a)+'</b> <button onclick="rmLiab('+i+')" style="background:none;border:none;color:var(--red);font-weight:700;margin-left:8px">×</button></span>';b.appendChild(r)})}
+function rmLiab(i){draft.liab.splice(i,1);renderLiab()}
+function toggleNoLiab(){if(document.getElementById('noLiab').checked){draft.liab=[];renderLiab()}}
+function validPAN(p){return /^[A-Z]{5}[0-9]{4}[A-Z]$/.test(p)}
+function nextStep(n){
+  if(n===1){var req=['bizName','bizPAN','bizReg','bizYear','bizCity','bizDesc','bizEmail','bizPhone','bizMobile'];for(var i=0;i<req.length;i++){if(!document.getElementById(req[i]).value.trim()){toast('Please fill all required profile fields');return}}
+    if(!validPAN(document.getElementById('bizPAN').value.trim().toUpperCase())){toast('Enter a valid 10-character company PAN');return}
+    if(document.getElementById('bizMobile').value.replace(/\D/g,'').length!==10){toast('Enter a valid 10-digit mobile');return}}
+  if(n===2){var f=0;document.querySelectorAll('.mInput').forEach(function(x){if(x.value)f++});if(f<36){toast('Enter all 36 months ('+f+'/36 done)');return}}
+  if(n===3){if(caMode==="own"&&(!document.getElementById('caName').value.trim()||!document.getElementById('caNum').value.trim())){toast('Enter CA name & ICAI number — or choose "I need a certificate"');return}if(!document.getElementById('finNP').value||!document.getElementById('finNW').value){toast('Enter net profit and net worth');return}}
+  if(n===4){if(draft.liab.length===0&&!document.getElementById('noLiab').checked){toast('Add liabilities or tick "no liabilities"');return}}
+  if(n===5)buildReview();
+  for(var s=0;s<6;s++){document.getElementById('fs'+s).classList.toggle('hidden',s!==n);var tab=document.getElementById('st'+s);tab.classList.toggle('act',s===n);tab.classList.toggle('done',s<n)}
+  curStep=n;window.scrollTo(0,0);
+}
+function buildReview(){
+  var name=document.getElementById('bizName').value,type=document.getElementById('bizType').value;
+  var months=[];document.querySelectorAll('.mInput').forEach(function(x){months.push(parseFloat(x.value)||0)});
+  var annual=Math.round(months.slice(-12).reduce(function(a,b){return a+b},0));
+  var totLiab=draft.liab.reduce(function(a,b){return a+b.a},0);
+  document.getElementById('reviewBox').innerHTML=
+    '<div class="kv"><span class="k">Company</span><span class="v">'+esc(name)+' ('+type+') — appears publicly as "'+esc(document.getElementById('bizSector').value)+' '+typeShort(type)+'"</span></div>'+
+    '<div class="kv"><span class="k">Location</span><span class="v">'+esc(document.getElementById('bizCity').value)+', '+document.getElementById('bizState').value+'</span></div>'+
+    '<div class="kv"><span class="k">TTM turnover</span><span class="v">₹'+annual+' L</span></div>'+
+    '<div class="kv"><span class="k">Liabilities</span><span class="v">'+(draft.liab.length?draft.liab.length+' items · ₹'+totLiab+' L':'None')+'</span></div>'+
+    '<div class="kv"><span class="k">CA certification</span><span class="v">'+(caMode==="online"?'Via OnlineCACertificate.in (pending)':esc(document.getElementById('caName').value)+' (ICAI '+esc(document.getElementById('caNum').value)+')')+'</span></div>';
+  document.getElementById('feeBox').innerHTML='<div style="font-size:13px;font-weight:700;margin-bottom:8px">LISTING FEE</div><div class="fee-line"><span>3 years of data × ₹500</span><span>₹1,500</span></div><div class="fee-line"><span>GST @ 18%</span><span>₹270</span></div><div class="fee-line total"><span>Total payable</span><span>₹1,770</span></div>';
+}
+function submitListing(){
+  if(!document.getElementById('dec1').checked||!document.getElementById('dec2').checked||!document.getElementById('dec3').checked){toast('Please accept all three declarations before submitting');return}
+  var months=[];document.querySelectorAll('.mInput').forEach(function(x){months.push(parseFloat(x.value)||0)});
+  var newL={id:"DOB-"+(1060+DB.myListings.length),name:document.getElementById('bizName').value,type:document.getElementById('bizType').value,sector:document.getElementById('bizSector').value,state:document.getElementById('bizState').value,city:document.getElementById('bizCity').value,est:parseInt(document.getElementById('bizYear').value)||2020,emp:document.getElementById('bizEmp').value,desc:document.getElementById('bizDesc').value,email:document.getElementById('bizEmail').value,phone:document.getElementById('bizPhone').value,reg:document.getElementById('bizReg').value,ca:caMode==="online"?"OnlineCACertificate.in (pending)":document.getElementById('caName').value,caNum:caMode==="online"?"UDIN pending":document.getElementById('caNum').value,np:parseFloat(document.getElementById('finNP').value)||0,nw:parseFloat(document.getElementById('finNW').value)||0,turnover:months,liab:draft.liab.slice(),video:!!document.getElementById('videoFile').files.length};
+  DB.myListings.push(newL);LISTINGS.push(newL);saveDB();
+  toast('🎉 Listing submitted! Payment simulated · pending admin verification (live in demo immediately)');
+  setTimeout(function(){go('board')},1200);
+}
+
+/* ════════ INIT ════════ */
+initFilters();initForm();refreshNav();renderBoard();
+</script>
+</body>
+</html>

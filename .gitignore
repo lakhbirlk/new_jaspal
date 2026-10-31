@@ -18,6 +18,7 @@ deploy/aws/*.tfstate
 deploy/aws/*.tfstate.*
 deploy/aws/*.tfplan
 deploy/aws/crash.log
+deploy/ec2/tfplan
 
 # Editor and OS files
 .idea/
