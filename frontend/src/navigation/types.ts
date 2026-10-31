@@ -10,6 +10,10 @@ export type PublicStackParamList = {
   ForgotPassword: { email?: string } | undefined;
   ResetPassword: { token?: string } | undefined;
   AcceptInvite: { token?: string } | undefined;
+  RefundPolicy: undefined;
+  PrivacyPolicy: undefined;
+  TermsOfService: undefined;
+  Grievance: undefined;
 };
 
 export type ChallengeStackParamList = {

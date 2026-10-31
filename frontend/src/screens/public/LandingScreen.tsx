@@ -514,10 +514,22 @@ export default function LandingScreen({ navigation }: Props) {
 
             <View style={styles.footCol}>
               <Text style={styles.footHeading}>Legal</Text>
-              <Text style={styles.footLink}>Terms of Service</Text>
-              <Text style={styles.footLink}>Privacy Policy (DPDP 2023)</Text>
-              <Text style={styles.footLink}>Refund Policy</Text>
-              <Text style={styles.footLink}>Grievance & Contact</Text>
+              <FootLink
+                label="Terms of Service"
+                onPress={() => navigation.navigate('TermsOfService')}
+              />
+              <FootLink
+                label="Privacy Policy (DPDP 2023)"
+                onPress={() => navigation.navigate('PrivacyPolicy')}
+              />
+              <FootLink
+                label="Refund Policy"
+                onPress={() => navigation.navigate('RefundPolicy')}
+              />
+              <FootLink
+                label="Grievance & Contact"
+                onPress={() => navigation.navigate('Grievance')}
+              />
             </View>
           </View>
 

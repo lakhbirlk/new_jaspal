@@ -34,6 +34,10 @@ import VerifyEmailScreen from '../screens/public/VerifyEmailScreen';
 import ForgotPasswordScreen from '../screens/public/ForgotPasswordScreen';
 import ResetPasswordScreen from '../screens/public/ResetPasswordScreen';
 import AcceptInviteScreen from '../screens/public/AcceptInviteScreen';
+import RefundPolicyScreen from '../screens/public/RefundPolicyScreen';
+import PrivacyPolicyScreen from '../screens/public/PrivacyPolicyScreen';
+import TermsOfServiceScreen from '../screens/public/TermsOfServiceScreen';
+import GrievanceScreen from '../screens/public/GrievanceScreen';
 import MfaVerifyScreen from '../screens/public/MfaVerifyScreen';
 import MfaSetupScreen from '../screens/public/MfaSetupScreen';
 import OnboardingHomeScreen from '../screens/onboarding/OnboardingHomeScreen';
@@ -223,7 +227,17 @@ const AdminMoreTab = withSignOutBar(AdminMoreScreen);
 
 const PublicStack = createNativeStackNavigator<PublicStackParamList>();
 
-type PublicEntry = 'AcceptInvite' | 'ResetPassword' | 'VerifyEmail' | 'Login' | 'Register' | 'ForgotPassword';
+type PublicEntry =
+  | 'AcceptInvite'
+  | 'ResetPassword'
+  | 'VerifyEmail'
+  | 'Login'
+  | 'Register'
+  | 'ForgotPassword'
+  | 'RefundPolicy'
+  | 'PrivacyPolicy'
+  | 'TermsOfService'
+  | 'Grievance';
 
 const publicEmailRoutes: Record<string, PublicEntry> = {
   '/accept-invite': 'AcceptInvite',
@@ -232,6 +246,10 @@ const publicEmailRoutes: Record<string, PublicEntry> = {
   '/login': 'Login',
   '/register': 'Register',
   '/forgot-password': 'ForgotPassword',
+  '/refund-policy': 'RefundPolicy',
+  '/privacy-policy': 'PrivacyPolicy',
+  '/terms-of-service': 'TermsOfService',
+  '/grievance': 'Grievance',
 };
 
 /**
@@ -296,6 +314,26 @@ function PublicNavigator() {
         component={AcceptInviteScreen}
         options={{ title: 'Accept invitation' }}
         initialParams={entry?.name === 'AcceptInvite' ? { token: entry.token } : undefined}
+      />
+      <PublicStack.Screen
+        name="RefundPolicy"
+        component={RefundPolicyScreen}
+        options={{ title: 'Refund policy' }}
+      />
+      <PublicStack.Screen
+        name="PrivacyPolicy"
+        component={PrivacyPolicyScreen}
+        options={{ title: 'Privacy policy' }}
+      />
+      <PublicStack.Screen
+        name="TermsOfService"
+        component={TermsOfServiceScreen}
+        options={{ title: 'Terms of service' }}
+      />
+      <PublicStack.Screen
+        name="Grievance"
+        component={GrievanceScreen}
+        options={{ title: 'Grievance & contact' }}
       />
     </PublicStack.Navigator>
   );
