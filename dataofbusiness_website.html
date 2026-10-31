@@ -56,6 +56,15 @@ nav{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid va
 .hstat b{font-size:26px;font-weight:800;display:block}
 .hstat span{font-size:12.5px;color:#9FACDD}
 
+/* intro video */
+.intro{background:var(--bg);border-bottom:1px solid var(--line);padding:48px 0 52px}
+.intro-frame{position:relative;max-width:900px;margin:0 auto;border-radius:16px;overflow:hidden;background:var(--navy-deep);border:1px solid rgba(20,27,71,.18);box-shadow:0 22px 60px rgba(20,27,71,.22)}
+.intro-frame video{display:block;width:100%;height:auto;max-height:620px;background:#0B1030}
+.intro-tag{position:absolute;top:14px;left:14px;z-index:2;pointer-events:none;background:rgba(11,16,48,.72);color:#fff;font-size:11.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:5px 11px;border-radius:99px;display:flex;align-items:center;gap:7px;backdrop-filter:blur(4px)}
+.intro-tag .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:introPulse 1.8s ease-in-out infinite}
+@keyframes introPulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media(max-width:680px){.intro{padding:36px 0 40px}.intro-frame{border-radius:12px}}
+
 /* trust strip */
 .trust{background:#fff;border-bottom:1px solid var(--line);padding:18px 20px}
 .trust-in{max-width:1080px;margin:0 auto;display:flex;gap:8px 36px;flex-wrap:wrap;justify-content:center}
@@ -245,6 +254,7 @@ footer{background:var(--navy-deep);color:#9FACDD;padding:44px 20px 30px;margin-t
       <div class="hero-ctas">
         <button class="btn btn-gold btn-lg" onclick="go('board')">Explore Company Database →</button>
         <button class="btn btn-lg" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25)" onclick="go('list')">List Your Company</button>
+        <button class="btn btn-lg" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25)" onclick="playIntro()"><span style="color:var(--gold);font-size:12px">▶</span> Watch intro</button>
       </div>
       <div class="hero-stats">
         <div class="hstat"><b id="statListings">0</b><span>Companies listed</span></div>
@@ -261,6 +271,21 @@ footer{background:var(--navy-deep);color:#9FACDD;padding:44px 20px 30px;margin-t
       <div class="trust-item">✓ Research &amp; due-diligence use only</div>
       <div class="trust-item">✓ No securities · No transactions</div>
       <div class="trust-item">✓ Every access audit-logged</div>
+    </div>
+  </div>
+
+  <!-- INTRO VIDEO -->
+  <div class="intro" id="introSection">
+    <div class="wrap">
+      <h2 class="sec-title">See how DataOfBusiness works</h2>
+      <p class="sec-sub">A short introduction to the platform — how verified company information is published, and how research members access it.</p>
+      <div class="intro-frame">
+        <span class="intro-tag"><span class="dot"></span> Platform intro</span>
+        <video id="introVideo" controls playsinline preload="metadata" aria-label="DataOfBusiness platform introduction video">
+          <source src="intro_video.mp4" type="video/mp4">
+          Your browser does not support the video tag. <a href="intro_video.mp4">Download the intro video</a>.
+        </video>
+      </div>
     </div>
   </div>
 
@@ -661,6 +686,13 @@ function activeDl(){return DB.downloads.filter(function(id){return DB.reported.i
 /* ════════ NAV ════════ */
 var pages=['home','board','detail','list'];
 function go(p){pages.forEach(function(x){document.getElementById('page-'+x).classList.add('hidden')});document.getElementById('page-'+p).classList.remove('hidden');window.scrollTo(0,0);if(p==='board')renderBoard()}
+function playIntro(){
+  var v=document.getElementById('introVideo'),sec=document.getElementById('introSection');
+  if(!v||!sec)return;
+  sec.scrollIntoView({behavior:'smooth',block:'center'});
+  var p=v.play();
+  if(p&&p.catch)p.catch(function(){});
+}
 function refreshNav(){
   document.getElementById('navMember').classList.toggle('hidden',!DB.member);
   document.getElementById('navJoin').classList.toggle('hidden',DB.member);

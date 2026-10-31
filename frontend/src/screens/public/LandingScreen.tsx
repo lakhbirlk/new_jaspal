@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Linking,
   Platform,
@@ -8,16 +8,20 @@ import {
   Text,
   useWindowDimensions,
   View,
+  type ScrollViewInstance,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fetchPublicBusinesses } from '../../api/endpoints';
 import type { PublicStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<PublicStackParamList, 'Landing'>;
+
+const INTRO_VIDEO = require('../../../assets/intro_video.mp4');
 
 const PALETTE = {
   navy: '#1E2761',
@@ -141,6 +145,12 @@ export default function LandingScreen({ navigation }: Props) {
   const compact = width < 700;
   const heroTitleSize = width >= 1000 ? 44 : width >= 700 ? 36 : 29;
 
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  const introSectionY = useRef(0);
+  const introPlayer = useVideoPlayer(INTRO_VIDEO, (player) => {
+    player.loop = false;
+  });
+
   // Mirrors the site's repeat(auto-fit, minmax(220px, 1fr)) grid: the last row
   // keeps the same card width as the full rows instead of stretching.
   const contentWidth = Math.min(width, 1080) - 40;
@@ -160,9 +170,13 @@ export default function LandingScreen({ navigation }: Props) {
   const openOnlineCa = () => {
     void Linking.openURL('https://onlinecacertificate.in');
   };
+  const playIntro = () => {
+    scrollRef.current?.scrollTo({ y: Math.max(0, introSectionY.current - 16), animated: true });
+    introPlayer.play();
+  };
 
   return (
-    <ScrollView style={styles.page} contentContainerStyle={styles.pageContent}>
+    <ScrollView ref={scrollRef} style={styles.page} contentContainerStyle={styles.pageContent}>
       {/* NAV */}
       <View style={[styles.nav, { paddingTop: insets.top }]}>
         <View style={[styles.container, styles.navInner]}>
@@ -240,6 +254,7 @@ export default function LandingScreen({ navigation }: Props) {
               onPress={() => navigation.navigate('CompanyDatabase')}
             />
             <LandingButton label="List Your Company" variant="glass" size="lg" onPress={joinAsBusiness} />
+            <LandingButton label="▶ Watch intro" variant="glass" size="lg" onPress={playIntro} />
           </View>
           <View style={styles.heroStats}>
             <HeroStat value={String(listings)} label="Companies listed" />
@@ -256,6 +271,36 @@ export default function LandingScreen({ navigation }: Props) {
           {TRUST.map((item) => (
             <Text key={item} style={styles.trustItem}>{item}</Text>
           ))}
+        </View>
+      </View>
+
+      {/* INTRO VIDEO */}
+      <View
+        style={[styles.introSection, { paddingVertical: compact ? 36 : 48 }]}
+        onLayout={(event) => {
+          introSectionY.current = event.nativeEvent.layout.y;
+        }}
+      >
+        <View style={styles.container}>
+          <Text style={styles.secTitle}>See how DataOfBusiness works</Text>
+          <Text style={styles.secSub}>
+            A short introduction to the platform — how verified company information is published,
+            and how research members access it.
+          </Text>
+          <View style={styles.introFrame}>
+            <VideoView
+              player={introPlayer}
+              style={styles.introVideo}
+              nativeControls
+              contentFit="contain"
+              playsInline
+              fullscreenOptions={{ enable: true }}
+            />
+            <View style={styles.introTag} pointerEvents="none">
+              <View style={styles.introTagDot} />
+              <Text style={styles.introTagText}>PLATFORM INTRO</Text>
+            </View>
+          </View>
         </View>
       </View>
 
@@ -737,6 +782,44 @@ const styles = StyleSheet.create({
     rowGap: 8,
   },
   trustItem: { fontSize: 13, color: PALETTE.mut, fontWeight: '600' },
+
+  // intro video
+  introSection: {
+    backgroundColor: PALETTE.bg,
+    borderBottomWidth: 1,
+    borderBottomColor: PALETTE.line,
+  },
+  introFrame: {
+    width: '100%',
+    maxWidth: 900,
+    alignSelf: 'center',
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: PALETTE.navyDeep,
+    borderWidth: 1,
+    borderColor: 'rgba(20,27,71,0.18)',
+    ...cardShadow,
+  },
+  introVideo: { width: '100%', aspectRatio: 16 / 9, backgroundColor: '#0B1030' },
+  introTag: {
+    position: 'absolute',
+    top: 14,
+    left: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    backgroundColor: 'rgba(11,16,48,0.72)',
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    borderRadius: 99,
+  },
+  introTagDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: PALETTE.gold },
+  introTagText: {
+    color: '#FFFFFF',
+    fontSize: 11.5,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+  },
 
   // sections
   section: { paddingVertical: 56 },
